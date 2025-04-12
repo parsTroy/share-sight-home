@@ -6,6 +6,7 @@ import { StockList } from "@/components/StockList";
 import { DividendSummary } from "@/components/DividendSummary";
 import { DividendGoalTracker } from "@/components/DividendGoalTracker";
 import { MonthlyDividendChart } from "@/components/MonthlyDividendChart";
+import { StockSuggestions } from "@/components/StockSuggestions";
 import { PortfolioProvider } from "@/hooks/use-portfolio";
 
 const Dashboard = () => {
@@ -38,6 +39,9 @@ const Dashboard = () => {
                 <MonthlyDividendChart />
               </div>
             </div>
+            
+            {/* Stock Suggestions Section */}
+            <StockSuggestions />
             
             {/* Stock List Section */}
             <StockList />
