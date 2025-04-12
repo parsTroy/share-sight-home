@@ -18,3 +18,13 @@ export interface SubscriptionContextType {
 export interface SubscriptionProviderProps {
   children: ReactNode;
 }
+
+export interface SubscriptionPlan {
+  tier: string;
+  name: string;
+  description: string;
+  stockLimit: number;
+  price: number;
+  annualPrice?: number;
+  features: string[];
+}

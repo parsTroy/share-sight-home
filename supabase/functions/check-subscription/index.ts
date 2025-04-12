@@ -113,7 +113,7 @@ serve(async (req) => {
         .eq("tier", "premium")
         .single();
         
-      stockLimit = limitData ? limitData.max_stocks : 999999; // Default to unlimited if not found
+      stockLimit = limitData ? limitData.max_stocks : 50; // Default premium users to 50 stocks if not found
     } else {
       logStep("No active subscription found, setting to free tier");
       

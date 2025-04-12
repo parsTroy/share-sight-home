@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { RotateCw, Star, Crown, AlarmClock, CreditCard } from "lucide-react";
+import { RotateCw, Star, Crown, AlarmClock, CreditCard, BarChart2 } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { useState } from "react";
@@ -38,7 +38,10 @@ export const SubscriptionBanner = () => {
             <div>
               <h3 className="font-medium">Premium Subscription Active</h3>
               <div className="text-sm text-muted-foreground flex flex-col gap-0.5">
-                <p>You have unlimited stock tracking</p>
+                <div className="flex items-center gap-1.5">
+                  <BarChart2 className="h-3.5 w-3.5" />
+                  <span>You can track up to <strong>{stockLimit}</strong> stocks {stockLimit === 999999 ? '(unlimited)' : ''}</span>
+                </div>
                 {subscriptionEnd && (
                   <div className="flex items-center gap-1">
                     <AlarmClock className="h-3.5 w-3.5" />

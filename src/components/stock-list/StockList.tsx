@@ -14,7 +14,7 @@ import { SubscriptionBanner } from "../SubscriptionBanner";
 
 export const StockList = () => {
   const { stocks, addStock, removeStock, updateStock } = usePortfolio();
-  const { canAddStock } = useSubscription();
+  const { canAddStock, stockLimit, subscriptionTier } = useSubscription();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -46,7 +46,11 @@ export const StockList = () => {
     if (canAddStock(stocks.length)) {
       setIsAddDialogOpen(true);
     } else {
-      toast.error("You've reached your stock limit. Please upgrade to Premium for unlimited stocks.");
+      if (subscriptionTier === "premium") {
+        toast.error(`You've reached your ${stockLimit} stock limit. Contact support to increase your limit.`);
+      } else {
+        toast.error("You've reached your stock limit. Please upgrade to Premium for more stocks.");
+      }
     }
   };
 
