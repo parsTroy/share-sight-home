@@ -1,55 +1,10 @@
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Portfolio, Stock } from "@/types";
-
-// Sample initial stocks
-const initialStocks: Stock[] = [
-  {
-    id: "1",
-    ticker: "AAPL",
-    quantity: 10,
-    purchasePrice: 150.25,
-    currentPrice: 165.30,
-    dividendYield: 0.52,
-    dividendFrequency: "quarterly"
-  },
-  {
-    id: "2",
-    ticker: "MSFT",
-    quantity: 5,
-    purchasePrice: 280.50,
-    currentPrice: 300.10,
-    dividendYield: 0.78,
-    dividendFrequency: "quarterly"
-  },
-  {
-    id: "3",
-    ticker: "GOOGL",
-    quantity: 2,
-    purchasePrice: 2850.75,
-    currentPrice: 2700.25,
-    dividendYield: 0.25,
-    dividendFrequency: "quarterly"
-  },
-  {
-    id: "4",
-    ticker: "JNJ",
-    quantity: 8,
-    purchasePrice: 165.50,
-    currentPrice: 170.80,
-    dividendYield: 2.45,
-    dividendFrequency: "quarterly"
-  },
-  {
-    id: "5",
-    ticker: "O",
-    quantity: 20,
-    purchasePrice: 65.75,
-    currentPrice: 68.30,
-    dividendYield: 4.8,
-    dividendFrequency: "monthly"
-  }
-];
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useAuth } from "./use-auth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Create context
 const PortfolioContext = createContext<Portfolio | undefined>(undefined);
@@ -78,28 +33,199 @@ const calculatePortfolioMetrics = (stocks: Stock[]) => {
 
 // Provider component
 export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
-  const [stocks, setStocks] = useState<Stock[]>(initialStocks);
-  const [dividendGoal, setDividendGoal] = useState<number>(5000);
-  const { portfolioValue, portfolioChange, portfolioChangePercent } = calculatePortfolioMetrics(stocks);
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [dividendGoal, setDividendGoalState] = useState<number>(5000);
+
+  // Fetch stocks from Supabase
+  const { data: stocks = [], isLoading: stocksLoading } = useQuery({
+    queryKey: ['stocks', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      const { data, error } = await supabase
+        .from('stocks')
+        .select('*')
+        .order('ticker');
+        
+      if (error) {
+        toast.error(`Failed to load stocks: ${error.message}`);
+        return [];
+      }
+      
+      return data.map((stock: any) => ({
+        id: stock.id,
+        ticker: stock.ticker,
+        quantity: Number(stock.quantity),
+        purchasePrice: Number(stock.purchase_price),
+        currentPrice: Number(stock.current_price),
+        dividendYield: stock.dividend_yield ? Number(stock.dividend_yield) : undefined,
+        dividendFrequency: stock.dividend_frequency as any,
+        exDividendDate: stock.ex_dividend_date
+      }));
+    },
+    enabled: !!user,
+  });
+
+  // Fetch dividend goal from Supabase
+  const { data: goalData, isLoading: goalLoading } = useQuery({
+    queryKey: ['dividendGoal', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      
+      const { data, error } = await supabase
+        .from('dividend_goals')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (error && error.code !== 'PGRST116') {
+        toast.error(`Failed to load dividend goal: ${error.message}`);
+        return null;
+      }
+      
+      if (data) {
+        return data;
+      } else {
+        // Create a default goal if none exists
+        const { data: newGoal, error: insertError } = await supabase
+          .from('dividend_goals')
+          .insert([{ user_id: user.id, annual_goal: 5000 }])
+          .select()
+          .single();
+          
+        if (insertError) {
+          toast.error(`Failed to create dividend goal: ${insertError.message}`);
+          return null;
+        }
+        
+        return newGoal;
+      }
+    },
+    enabled: !!user,
+  });
+
+  // Set the dividend goal from fetched data
+  useEffect(() => {
+    if (goalData && !goalLoading) {
+      setDividendGoalState(Number(goalData.annual_goal));
+    }
+  }, [goalData, goalLoading]);
+
+  // Add a new stock mutation
+  const addStockMutation = useMutation({
+    mutationFn: async (stock: Stock) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      const { error } = await supabase
+        .from('stocks')
+        .insert([{
+          user_id: user.id,
+          ticker: stock.ticker,
+          quantity: stock.quantity,
+          purchase_price: stock.purchasePrice,
+          current_price: stock.currentPrice,
+          dividend_yield: stock.dividendYield,
+          dividend_frequency: stock.dividendFrequency,
+          ex_dividend_date: stock.exDividendDate
+        }]);
+        
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stocks', user?.id] });
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to add stock: ${error.message}`);
+    }
+  });
+
+  // Remove a stock mutation
+  const removeStockMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('stocks')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stocks', user?.id] });
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to remove stock: ${error.message}`);
+    }
+  });
+
+  // Update a stock mutation
+  const updateStockMutation = useMutation({
+    mutationFn: async (stock: Stock) => {
+      const { error } = await supabase
+        .from('stocks')
+        .update({
+          quantity: stock.quantity,
+          purchase_price: stock.purchasePrice,
+          current_price: stock.currentPrice,
+          dividend_yield: stock.dividendYield,
+          dividend_frequency: stock.dividendFrequency,
+          ex_dividend_date: stock.exDividendDate
+        })
+        .eq('id', stock.id);
+        
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stocks', user?.id] });
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to update stock: ${error.message}`);
+    }
+  });
+
+  // Update dividend goal mutation
+  const updateDividendGoalMutation = useMutation({
+    mutationFn: async (goal: number) => {
+      if (!user) throw new Error('User not authenticated');
+      
+      const { error } = await supabase
+        .from('dividend_goals')
+        .update({ annual_goal: goal })
+        .eq('user_id', user.id);
+        
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dividendGoal', user?.id] });
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to update dividend goal: ${error.message}`);
+    }
+  });
 
   // Add a new stock
   const addStock = (stock: Stock) => {
-    setStocks(prev => [...prev, stock]);
+    addStockMutation.mutate(stock);
   };
 
   // Remove a stock
   const removeStock = (id: string) => {
-    setStocks(prev => prev.filter(stock => stock.id !== id));
+    removeStockMutation.mutate(id);
   };
 
   // Update an existing stock
   const updateStock = (updatedStock: Stock) => {
-    setStocks(prev => 
-      prev.map(stock => 
-        stock.id === updatedStock.id ? updatedStock : stock
-      )
-    );
+    updateStockMutation.mutate(updatedStock);
   };
+
+  // Set dividend goal
+  const setDividendGoal = (goal: number) => {
+    setDividendGoalState(goal);
+    updateDividendGoalMutation.mutate(goal);
+  };
+
+  // Calculate portfolio metrics
+  const { portfolioValue, portfolioChange, portfolioChangePercent } = calculatePortfolioMetrics(stocks);
 
   return (
     <PortfolioContext.Provider value={{

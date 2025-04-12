@@ -9,7 +9,96 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      dividend_goals: {
+        Row: {
+          annual_goal: number
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          annual_goal?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          annual_goal?: number
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stocks: {
+        Row: {
+          created_at: string
+          current_price: number
+          dividend_frequency: string | null
+          dividend_yield: number | null
+          ex_dividend_date: string | null
+          id: string
+          purchase_price: number
+          quantity: number
+          ticker: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_price: number
+          dividend_frequency?: string | null
+          dividend_yield?: number | null
+          ex_dividend_date?: string | null
+          id?: string
+          purchase_price: number
+          quantity: number
+          ticker: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_price?: number
+          dividend_frequency?: string | null
+          dividend_yield?: number | null
+          ex_dividend_date?: string | null
+          id?: string
+          purchase_price?: number
+          quantity?: number
+          ticker?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

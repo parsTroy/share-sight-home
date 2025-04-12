@@ -10,16 +10,20 @@ import {
 import { User, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/hooks/use-auth";
 
 export const DashboardHeader = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { user, signOut } = useAuth();
   
-  const handleLogout = () => {
-    toast.info("Please connect to Supabase first to enable authentication");
-    // In a real app with Supabase, we would use:
-    // supabase.auth.signOut()
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (
@@ -50,7 +54,7 @@ export const DashboardHeader = () => {
           <DropdownMenuContent align="end">
             <DropdownMenuItem>
               <User className="mr-2 h-4 w-4" />
-              <span>Profile</span>
+              <span>{user?.email}</span>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Settings className="mr-2 h-4 w-4" />
