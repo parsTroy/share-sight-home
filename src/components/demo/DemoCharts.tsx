@@ -1,16 +1,21 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { BarChart3 } from "lucide-react";
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  ChartLegend,
+  ChartLegendContent,
+} from "@/components/ui/chart";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   BarChart,
-  Bar
+  Bar,
 } from "recharts";
 
 // Mock data for charts
@@ -45,6 +50,26 @@ const dividendData = [
 ];
 
 export const DemoCharts = () => {
+  const portfolioChartConfig = {
+    portfolio: {
+      label: "Portfolio Value",
+      theme: {
+        light: "#8884d8",
+        dark: "#9b87f5"
+      }
+    }
+  };
+  
+  const dividendChartConfig = {
+    dividend: {
+      label: "Dividend Income",
+      theme: {
+        light: "#82ca9d",
+        dark: "#6EBD90"
+      }
+    }
+  };
+
   return (
     <div className="grid gap-6 md:grid-cols-2 mb-8">
       <Card>
@@ -59,21 +84,30 @@ export const DemoCharts = () => {
             </div>
           </div>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer config={portfolioChartConfig}>
               <AreaChart data={portfolioData}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="var(--color-portfolio, #8884d8)" stopOpacity={0.8}/>
+                    <stop offset="95%" stopColor="var(--color-portfolio, #8884d8)" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="name" />
                 <YAxis />
                 <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
-                <Area type="monotone" dataKey="value" stroke="#8884d8" fillOpacity={1} fill="url(#colorValue)" />
+                <ChartTooltip>
+                  <ChartTooltipContent />
+                </ChartTooltip>
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="var(--color-portfolio, #8884d8)" 
+                  fillOpacity={1} 
+                  fill="url(#colorValue)" 
+                  name="portfolio"
+                />
               </AreaChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </CardContent>
       </Card>
@@ -90,15 +124,24 @@ export const DemoCharts = () => {
             </div>
           </div>
           <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
+            <ChartContainer config={dividendChartConfig}>
               <BarChart data={dividendData}>
                 <XAxis dataKey="name" />
                 <YAxis />
                 <CartesianGrid strokeDasharray="3 3" />
-                <Tooltip />
-                <Bar dataKey="value" fill="#82ca9d" />
+                <ChartTooltip>
+                  <ChartTooltipContent />
+                </ChartTooltip>
+                <ChartLegend verticalAlign="top">
+                  <ChartLegendContent />
+                </ChartLegend>
+                <Bar 
+                  dataKey="value" 
+                  fill="var(--color-dividend, #82ca9d)" 
+                  name="dividend"
+                />
               </BarChart>
-            </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </CardContent>
       </Card>
