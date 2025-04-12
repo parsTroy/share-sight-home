@@ -10,6 +10,9 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Demo from "./pages/Demo";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Contact from "./pages/Contact";
 import { AuthProvider } from "./hooks/use-auth";
 import { SubscriptionProvider } from "./hooks/use-subscription";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -29,6 +32,9 @@ const App = () => (
                 <Route path="/" element={<Landing />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/demo" element={<Demo />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/contact" element={<Contact />} />
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <Dashboard />
