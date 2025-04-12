@@ -11,6 +11,8 @@ export interface SubscriptionContextType {
   startCheckout: (annual?: boolean) => Promise<void>;
   openCustomerPortal: () => Promise<void>;
   canAddStock: (currentCount: number) => boolean;
+  daysUntilRenewal: number | null;
+  isSubscriptionExpiringSoon: boolean;
 }
 
 export interface SubscriptionProviderProps {

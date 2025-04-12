@@ -1,13 +1,23 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { RotateCw, Star, Crown } from "lucide-react";
+import { RotateCw, Star, Crown, AlarmClock, CreditCard } from "lucide-react";
 import { useSubscription } from "@/hooks/use-subscription";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { useState } from "react";
+import { format } from "date-fns";
 
 export const SubscriptionBanner = () => {
-  const { isSubscribed, subscriptionTier, stockLimit, startCheckout, openCustomerPortal } = useSubscription();
+  const { 
+    isSubscribed, 
+    subscriptionTier, 
+    subscriptionEnd, 
+    stockLimit, 
+    startCheckout, 
+    openCustomerPortal,
+    daysUntilRenewal,
+    isSubscriptionExpiringSoon
+  } = useSubscription();
   const { stocks } = usePortfolio();
   const [isLoading, setIsLoading] = useState(false);
   
@@ -16,7 +26,7 @@ export const SubscriptionBanner = () => {
   const isNearLimit = stockCount >= stockLimit * 0.8;
   const isAtLimit = stockCount >= stockLimit;
 
-  // Don't show if user is already subscribed
+  // For premium users - show subscription status
   if (isSubscribed && subscriptionTier === "premium") {
     return (
       <Card className="bg-gradient-to-r from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 border-amber-300 dark:border-amber-700 overflow-hidden">
@@ -27,17 +37,32 @@ export const SubscriptionBanner = () => {
             </div>
             <div>
               <h3 className="font-medium">Premium Subscription Active</h3>
-              <p className="text-sm text-muted-foreground">You have unlimited stock tracking</p>
+              <div className="text-sm text-muted-foreground flex flex-col gap-0.5">
+                <p>You have unlimited stock tracking</p>
+                {subscriptionEnd && (
+                  <div className="flex items-center gap-1">
+                    <AlarmClock className="h-3.5 w-3.5" />
+                    <span className={isSubscriptionExpiringSoon ? "text-amber-600 dark:text-amber-400 font-medium" : ""}>
+                      {isSubscriptionExpiringSoon 
+                        ? `Renews in ${daysUntilRenewal} day${daysUntilRenewal === 1 ? '' : 's'}`
+                        : `Renews ${format(new Date(subscriptionEnd), 'MMM d, yyyy')}`}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="border-amber-300 dark:border-amber-700"
-            onClick={() => openCustomerPortal()}
-          >
-            Manage Subscription
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="border-amber-300 dark:border-amber-700"
+              onClick={() => openCustomerPortal()}
+            >
+              <CreditCard className="mr-1.5 h-4 w-4" />
+              Manage Subscription
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -94,7 +119,11 @@ export const SubscriptionBanner = () => {
                   .finally(() => setIsLoading(false));
               }}
               disabled={isLoading}
+              className="relative"
             >
+              <span className="absolute -top-2 right-2 -translate-y-full bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+                BEST VALUE
+              </span>
               $79/year (2 months free)
             </Button>
           </div>
