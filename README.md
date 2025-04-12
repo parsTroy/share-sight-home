@@ -1,73 +1,46 @@
-# Welcome to your Lovable project
 
-## Project info
+# Dividnd - Dividend Investment Tracker
 
-**URL**: https://lovable.dev/projects/ecdadc23-75d1-46a7-a7fc-17d12c3b7d7b
+## Overview
 
-## How can I edit this code?
+Dividnd is a comprehensive web application designed to help investors track, manage, and optimize their dividend portfolios. Our platform provides powerful tools for visualizing dividend income, analyzing portfolio performance, and making data-driven investment decisions.
 
-There are several ways of editing your application.
+## Features
 
-**Use Lovable**
+- **Portfolio Dashboard**: View your entire dividend portfolio at a glance with real-time data updates.
+- **Dividend Tracking**: Monitor dividend payments, schedules, and income growth over time.
+- **Goal Setting**: Establish dividend income goals and track your progress.
+- **Stock Management**: Add, edit, and remove stocks from your portfolio with ease.
+- **Performance Analytics**: Visualize your portfolio's performance with interactive charts and graphs.
+- **Sector Allocation**: Analyze your portfolio's diversification across different market sectors.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ecdadc23-75d1-46a7-a7fc-17d12c3b7d7b) and start prompting.
+## Technologies
 
-Changes made via Lovable will be committed automatically to this repo.
+Dividnd is built with modern web technologies:
 
-**Use your preferred IDE**
+- **Frontend**: React, TypeScript, Tailwind CSS, Shadcn UI
+- **State Management**: TanStack Query (React Query)
+- **Data Visualization**: Recharts
+- **Authentication**: Supabase Auth
+- **Database**: Supabase PostgreSQL
+- **API Integration**: Stock data APIs for real-time market information
+- **Payment Processing**: Stripe integration for premium subscriptions
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Pages
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- **Landing Page**: Introduction to Dividnd with features, pricing, and testimonials
+- **Demo Dashboard**: Interactive demo showcasing the application's capabilities
+- **Authentication**: User login and signup
+- **Dashboard**: Main user interface for portfolio management
+- **Terms of Service**: Legal terms for using the application
+- **Privacy Policy**: Information about data handling and privacy practices
+- **Contact**: Get in touch with the Dividnd team
 
-Follow these steps:
+## Subscription Tiers
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **Free**: Basic portfolio tracking and dividend monitoring
+- **Premium**: Advanced analytics, real-time data, unlimited stock tracking, and more
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## Contact
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/ecdadc23-75d1-46a7-a7fc-17d12c3b7d7b) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+For support or inquiries, please contact us at support@dividnd.com or subscribe to our newsletter for regular updates on dividend investing strategies.
