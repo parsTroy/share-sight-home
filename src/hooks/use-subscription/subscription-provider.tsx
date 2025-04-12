@@ -1,24 +1,13 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useAuth } from "./use-auth";
+import { useAuth } from "@/hooks/use-auth";
+import { SubscriptionContextType, SubscriptionProviderProps } from "./types";
 
-interface SubscriptionContextType {
-  isSubscribed: boolean;
-  subscriptionTier: string;
-  subscriptionEnd: Date | null;
-  stockLimit: number;
-  isLoading: boolean;
-  checkSubscription: () => Promise<void>;
-  startCheckout: (annual?: boolean) => Promise<void>;
-  openCustomerPortal: () => Promise<void>;
-  canAddStock: (currentCount: number) => boolean;
-}
+export const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
 
-const SubscriptionContext = createContext<SubscriptionContextType | undefined>(undefined);
-
-export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
+export const SubscriptionProvider = ({ children }: SubscriptionProviderProps) => {
   const { user } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<string>("free");
@@ -147,12 +136,4 @@ export const SubscriptionProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </SubscriptionContext.Provider>
   );
-};
-
-export const useSubscription = () => {
-  const context = useContext(SubscriptionContext);
-  if (context === undefined) {
-    throw new Error('useSubscription must be used within a SubscriptionProvider');
-  }
-  return context;
 };
