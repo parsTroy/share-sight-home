@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,9 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				gain: "#22c55e", // green for stock gains
+				loss: "#ef4444", // red for stock losses
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
