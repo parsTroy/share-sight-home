@@ -19,6 +19,13 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "./ui/select";
 import { ArrowDown, ArrowUp, Plus, Trash, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { usePortfolio } from "@/hooks/use-portfolio";
@@ -32,12 +39,14 @@ export const StockList = () => {
   const [ticker, setTicker] = useState("");
   const [quantity, setQuantity] = useState("");
   const [purchasePrice, setPurchasePrice] = useState("");
+  const [dividendYield, setDividendYield] = useState("");
+  const [dividendFrequency, setDividendFrequency] = useState<"monthly" | "quarterly" | "semi-annual" | "annual">("quarterly");
   const [currentEditStock, setCurrentEditStock] = useState<Stock | null>(null);
 
   const handleAddStock = (e: React.FormEvent) => {
     e.preventDefault();
     if (!ticker || !quantity || !purchasePrice) {
-      toast.error("Please fill all fields");
+      toast.error("Please fill all required fields");
       return;
     }
     
@@ -47,45 +56,62 @@ export const StockList = () => {
       quantity: parseFloat(quantity),
       purchasePrice: parseFloat(purchasePrice),
       currentPrice: parseFloat(purchasePrice) * (1 + Math.random() * 0.2 - 0.1), // Mock price
+      dividendYield: dividendYield ? parseFloat(dividendYield) : undefined,
+      dividendFrequency: dividendYield ? dividendFrequency : undefined
     });
     
     toast.success(`Added ${ticker.toUpperCase()} to your portfolio`);
-    setTicker("");
-    setQuantity("");
-    setPurchasePrice("");
+    resetForm();
     setIsAddDialogOpen(false);
   };
 
   const handleEditStock = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentEditStock || !quantity || !purchasePrice) {
-      toast.error("Please fill all fields");
+      toast.error("Please fill all required fields");
       return;
     }
     
     updateStock({
       ...currentEditStock,
       quantity: parseFloat(quantity),
-      purchasePrice: parseFloat(purchasePrice)
+      purchasePrice: parseFloat(purchasePrice),
+      dividendYield: dividendYield ? parseFloat(dividendYield) : undefined,
+      dividendFrequency: dividendYield ? dividendFrequency : undefined
     });
     
     toast.success(`Updated ${currentEditStock.ticker}`);
-    setQuantity("");
-    setPurchasePrice("");
+    resetForm();
     setIsEditDialogOpen(false);
     setCurrentEditStock(null);
+  };
+
+  const resetForm = () => {
+    setTicker("");
+    setQuantity("");
+    setPurchasePrice("");
+    setDividendYield("");
+    setDividendFrequency("quarterly");
   };
 
   const openEditDialog = (stock: Stock) => {
     setCurrentEditStock(stock);
     setQuantity(stock.quantity.toString());
     setPurchasePrice(stock.purchasePrice.toString());
+    setDividendYield(stock.dividendYield?.toString() || "");
+    setDividendFrequency(stock.dividendFrequency || "quarterly");
     setIsEditDialogOpen(true);
   };
 
   const handleDelete = (stock: Stock) => {
     removeStock(stock.id);
     toast.success(`Removed ${stock.ticker} from your portfolio`);
+  };
+
+  // Calculate annual dividend income for a stock
+  const calculateAnnualDividend = (stock: Stock) => {
+    if (!stock.dividendYield) return 0;
+    return (stock.quantity * stock.currentPrice * (stock.dividendYield / 100));
   };
 
   return (
@@ -104,7 +130,7 @@ export const StockList = () => {
             </DialogHeader>
             <form onSubmit={handleAddStock} className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="ticker">Ticker Symbol</Label>
+                <Label htmlFor="ticker">Ticker Symbol*</Label>
                 <Input
                   id="ticker"
                   placeholder="e.g. AAPL"
@@ -114,7 +140,7 @@ export const StockList = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="quantity">Quantity</Label>
+                <Label htmlFor="quantity">Quantity*</Label>
                 <Input
                   id="quantity"
                   type="number"
@@ -127,7 +153,7 @@ export const StockList = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="price">Purchase Price</Label>
+                <Label htmlFor="price">Purchase Price*</Label>
                 <Input
                   id="price"
                   type="number"
@@ -139,6 +165,37 @@ export const StockList = () => {
                   step="0.01"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="dividend-yield">Dividend Yield (%)</Label>
+                <Input
+                  id="dividend-yield"
+                  type="number"
+                  placeholder="e.g. 2.5"
+                  value={dividendYield}
+                  onChange={(e) => setDividendYield(e.target.value)}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              {dividendYield && parseFloat(dividendYield) > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="dividend-frequency">Dividend Frequency</Label>
+                  <Select
+                    value={dividendFrequency}
+                    onValueChange={(value) => setDividendFrequency(value as "monthly" | "quarterly" | "semi-annual" | "annual")}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                      <SelectItem value="semi-annual">Semi-Annual</SelectItem>
+                      <SelectItem value="annual">Annual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <DialogFooter>
                 <Button type="submit">Add Stock</Button>
               </DialogFooter>
@@ -153,7 +210,7 @@ export const StockList = () => {
             </DialogHeader>
             <form onSubmit={handleEditStock} className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="edit-quantity">Quantity</Label>
+                <Label htmlFor="edit-quantity">Quantity*</Label>
                 <Input
                   id="edit-quantity"
                   type="number"
@@ -166,7 +223,7 @@ export const StockList = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="edit-price">Purchase Price</Label>
+                <Label htmlFor="edit-price">Purchase Price*</Label>
                 <Input
                   id="edit-price"
                   type="number"
@@ -178,6 +235,37 @@ export const StockList = () => {
                   step="0.01"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-dividend-yield">Dividend Yield (%)</Label>
+                <Input
+                  id="edit-dividend-yield"
+                  type="number"
+                  placeholder="e.g. 2.5"
+                  value={dividendYield}
+                  onChange={(e) => setDividendYield(e.target.value)}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              {dividendYield && parseFloat(dividendYield) > 0 && (
+                <div className="space-y-2">
+                  <Label htmlFor="edit-dividend-frequency">Dividend Frequency</Label>
+                  <Select
+                    value={dividendFrequency}
+                    onValueChange={(value) => setDividendFrequency(value as "monthly" | "quarterly" | "semi-annual" | "annual")}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                      <SelectItem value="semi-annual">Semi-Annual</SelectItem>
+                      <SelectItem value="annual">Annual</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <DialogFooter>
                 <Button type="submit">Update Stock</Button>
               </DialogFooter>
@@ -196,6 +284,8 @@ export const StockList = () => {
               <TableHead className="text-right">Current Price</TableHead>
               <TableHead className="text-right">Change</TableHead>
               <TableHead className="text-right">Market Value</TableHead>
+              <TableHead className="text-right">Div Yield</TableHead>
+              <TableHead className="text-right">Est. Annual Div</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -205,6 +295,7 @@ export const StockList = () => {
                 const priceChange = stock.currentPrice - stock.purchasePrice;
                 const priceChangePercent = (priceChange / stock.purchasePrice) * 100;
                 const marketValue = stock.quantity * stock.currentPrice;
+                const annualDividend = calculateAnnualDividend(stock);
                 
                 return (
                   <TableRow key={stock.id}>
@@ -223,6 +314,12 @@ export const StockList = () => {
                       </span>
                     </TableCell>
                     <TableCell className="text-right">${marketValue.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">
+                      {stock.dividendYield ? `${stock.dividendYield}%` : '-'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {annualDividend > 0 ? `$${annualDividend.toFixed(2)}` : '-'}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-1">
                         <Button 
@@ -248,7 +345,7 @@ export const StockList = () => {
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-6">
+                <TableCell colSpan={9} className="text-center py-6">
                   <div className="text-muted-foreground">
                     No stocks in your portfolio yet. Add your first stock to get started!
                   </div>

@@ -5,6 +5,9 @@ export interface Stock {
   quantity: number;
   purchasePrice: number;
   currentPrice: number;
+  dividendYield?: number;
+  dividendFrequency?: 'monthly' | 'quarterly' | 'semi-annual' | 'annual';
+  exDividendDate?: string;
 }
 
 export interface Portfolio {
@@ -15,4 +18,6 @@ export interface Portfolio {
   addStock: (stock: Stock) => void;
   removeStock: (id: string) => void;
   updateStock: (stock: Stock) => void;
+  dividendGoal: number;
+  setDividendGoal: (goal: number) => void;
 }

@@ -3,6 +3,9 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { PortfolioSummary } from "@/components/PortfolioSummary";
 import { PortfolioChart } from "@/components/PortfolioChart";
 import { StockList } from "@/components/StockList";
+import { DividendSummary } from "@/components/DividendSummary";
+import { DividendGoalTracker } from "@/components/DividendGoalTracker";
+import { MonthlyDividendChart } from "@/components/MonthlyDividendChart";
 import { PortfolioProvider } from "@/hooks/use-portfolio";
 
 const Dashboard = () => {
@@ -20,6 +23,19 @@ const Dashboard = () => {
               </div>
               <div className="lg:col-span-2">
                 <PortfolioChart />
+              </div>
+            </div>
+            
+            {/* Dividend Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1">
+                <DividendSummary />
+              </div>
+              <div className="lg:col-span-1">
+                <DividendGoalTracker />
+              </div>
+              <div className="lg:col-span-1">
+                <MonthlyDividendChart />
               </div>
             </div>
             

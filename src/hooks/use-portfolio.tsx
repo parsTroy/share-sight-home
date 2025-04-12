@@ -9,21 +9,45 @@ const initialStocks: Stock[] = [
     ticker: "AAPL",
     quantity: 10,
     purchasePrice: 150.25,
-    currentPrice: 165.30
+    currentPrice: 165.30,
+    dividendYield: 0.52,
+    dividendFrequency: "quarterly"
   },
   {
     id: "2",
     ticker: "MSFT",
     quantity: 5,
     purchasePrice: 280.50,
-    currentPrice: 300.10
+    currentPrice: 300.10,
+    dividendYield: 0.78,
+    dividendFrequency: "quarterly"
   },
   {
     id: "3",
     ticker: "GOOGL",
     quantity: 2,
     purchasePrice: 2850.75,
-    currentPrice: 2700.25
+    currentPrice: 2700.25,
+    dividendYield: 0.25,
+    dividendFrequency: "quarterly"
+  },
+  {
+    id: "4",
+    ticker: "JNJ",
+    quantity: 8,
+    purchasePrice: 165.50,
+    currentPrice: 170.80,
+    dividendYield: 2.45,
+    dividendFrequency: "quarterly"
+  },
+  {
+    id: "5",
+    ticker: "O",
+    quantity: 20,
+    purchasePrice: 65.75,
+    currentPrice: 68.30,
+    dividendYield: 4.8,
+    dividendFrequency: "monthly"
   }
 ];
 
@@ -55,6 +79,7 @@ const calculatePortfolioMetrics = (stocks: Stock[]) => {
 // Provider component
 export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
   const [stocks, setStocks] = useState<Stock[]>(initialStocks);
+  const [dividendGoal, setDividendGoal] = useState<number>(5000);
   const { portfolioValue, portfolioChange, portfolioChangePercent } = calculatePortfolioMetrics(stocks);
 
   // Add a new stock
@@ -84,7 +109,9 @@ export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
       portfolioChangePercent,
       addStock,
       removeStock,
-      updateStock
+      updateStock,
+      dividendGoal,
+      setDividendGoal
     }}>
       {children}
     </PortfolioContext.Provider>
