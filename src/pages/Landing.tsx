@@ -31,7 +31,7 @@ const Landing = () => {
             <Button onClick={() => navigate("/dashboard")} size="lg">
               Get Started for Free
             </Button>
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" onClick={() => navigate("/demo")}>
               View Demo
             </Button>
           </div>
