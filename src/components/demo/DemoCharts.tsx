@@ -95,9 +95,7 @@ export const DemoCharts = () => {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <CartesianGrid strokeDasharray="3 3" />
-                <ChartTooltip>
-                  <ChartTooltipContent />
-                </ChartTooltip>
+                <ChartTooltip content={<ChartTooltipContent />} />
                 <Area 
                   type="monotone" 
                   dataKey="value" 
@@ -129,12 +127,8 @@ export const DemoCharts = () => {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <CartesianGrid strokeDasharray="3 3" />
-                <ChartTooltip>
-                  <ChartTooltipContent />
-                </ChartTooltip>
-                <ChartLegend verticalAlign="top">
-                  <ChartLegendContent />
-                </ChartLegend>
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartLegend verticalAlign="top" content={<ChartLegendContent />} />
                 <Bar 
                   dataKey="value" 
                   fill="var(--color-dividend, #82ca9d)" 
