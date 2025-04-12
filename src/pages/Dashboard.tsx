@@ -12,7 +12,7 @@ import { PortfolioProvider } from "@/hooks/use-portfolio";
 const Dashboard = () => {
   return (
     <PortfolioProvider>
-      <div className="flex flex-col min-h-screen bg-gray-50">
+      <div className="flex flex-col min-h-screen bg-background">
         <DashboardHeader />
         
         <main className="flex-grow p-6 md:p-10">

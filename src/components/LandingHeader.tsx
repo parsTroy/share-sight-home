@@ -6,9 +6,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { toast } from "sonner";
+import { Moon, Sun } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
 
 export const LandingHeader = () => {
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isSignupOpen, setIsSignupOpen] = useState(false);
   const [loginEmail, setLoginEmail] = useState("");
@@ -36,18 +39,31 @@ export const LandingHeader = () => {
   };
 
   return (
-    <header className="py-4 px-6 md:px-10 flex justify-between items-center border-b">
+    <header className="py-4 px-6 md:px-10 flex justify-between items-center border-b bg-background">
       <div className="flex items-center">
-        <h1 className="text-2xl font-bold text-primary">ShareSight</h1>
+        <h1 className="text-2xl font-bold text-primary">Dividnd</h1>
       </div>
-      <div className="flex space-x-4">
+      <div className="flex space-x-4 items-center">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-full"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          aria-label="Toggle theme"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
+        </Button>
         <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
           <DialogTrigger asChild>
             <Button variant="outline">Log in</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Log in to ShareSight</DialogTitle>
+              <DialogTitle>Log in to Dividnd</DialogTitle>
               <DialogDescription>
                 Enter your credentials to access your portfolio
               </DialogDescription>
@@ -86,7 +102,7 @@ export const LandingHeader = () => {
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create your ShareSight account</DialogTitle>
+              <DialogTitle>Create your Dividnd account</DialogTitle>
               <DialogDescription>
                 Start tracking your investments in minutes
               </DialogDescription>

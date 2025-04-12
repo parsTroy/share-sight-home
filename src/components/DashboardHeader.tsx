@@ -7,11 +7,13 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "./ui/dropdown-menu";
-import { User, Settings, LogOut } from "lucide-react";
+import { User, Settings, LogOut, Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
+import { useTheme } from "@/hooks/use-theme";
 
 export const DashboardHeader = () => {
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
   
   const handleLogout = () => {
     toast.info("Please connect to Supabase first to enable authentication");
@@ -21,11 +23,24 @@ export const DashboardHeader = () => {
   };
 
   return (
-    <header className="py-4 px-6 flex justify-between items-center border-b bg-white">
+    <header className="py-4 px-6 flex justify-between items-center border-b bg-background">
       <div className="flex items-center">
-        <h1 className="text-2xl font-bold text-primary">ShareSight</h1>
+        <h1 className="text-2xl font-bold text-primary">Dividnd</h1>
       </div>
       <div className="flex items-center space-x-4">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="rounded-full"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          aria-label="Toggle theme"
+        >
+          {theme === "dark" ? (
+            <Sun className="h-5 w-5" />
+          ) : (
+            <Moon className="h-5 w-5" />
+          )}
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
