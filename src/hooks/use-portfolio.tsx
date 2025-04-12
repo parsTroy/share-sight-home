@@ -46,6 +46,7 @@ export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
       const { data, error } = await supabase
         .from('stocks')
         .select('*')
+        .eq('user_id', user.id)
         .order('ticker');
         
       if (error) {
@@ -116,6 +117,23 @@ export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
   const addStockMutation = useMutation({
     mutationFn: async (stock: Stock) => {
       if (!user) throw new Error('User not authenticated');
+      
+      // Try to get real-time stock data first
+      try {
+        const { data: realTimeData, error: realTimeError } = await supabase.functions.invoke('fetch-stock-data', {
+          body: { ticker: stock.ticker },
+        });
+        
+        if (!realTimeError && realTimeData) {
+          // Update stock with real-time data if available
+          stock.currentPrice = realTimeData.price || stock.currentPrice;
+          stock.dividendYield = realTimeData.dividendYield || stock.dividendYield;
+          stock.exDividendDate = realTimeData.dividendDate || stock.exDividendDate;
+        }
+      } catch (e) {
+        console.error('Error fetching real-time stock data:', e);
+        // Continue with the provided stock data
+      }
       
       const { error } = await supabase
         .from('stocks')

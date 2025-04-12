@@ -26,10 +26,12 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "./ui/select";
-import { ArrowDown, ArrowUp, Plus, Trash, Edit } from "lucide-react";
+import { ArrowDown, ArrowUp, Plus, Trash, Edit, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { Stock } from "@/types";
+import { useStockData } from "@/hooks/use-stock-data";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 export const StockList = () => {
   const { stocks, addStock, removeStock, updateStock } = usePortfolio();
@@ -42,27 +44,43 @@ export const StockList = () => {
   const [dividendYield, setDividendYield] = useState("");
   const [dividendFrequency, setDividendFrequency] = useState<"monthly" | "quarterly" | "semi-annual" | "annual">("quarterly");
   const [currentEditStock, setCurrentEditStock] = useState<Stock | null>(null);
+  const [isLookingUpTicker, setIsLookingUpTicker] = useState(false);
+  const { stockData, isLoading, refreshStockData } = useStockData(ticker || null);
 
-  const handleAddStock = (e: React.FormEvent) => {
+  const handleAddStock = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ticker || !quantity || !purchasePrice) {
       toast.error("Please fill all required fields");
       return;
     }
     
-    addStock({
-      id: Date.now().toString(),
-      ticker: ticker.toUpperCase(),
-      quantity: parseFloat(quantity),
-      purchasePrice: parseFloat(purchasePrice),
-      currentPrice: parseFloat(purchasePrice) * (1 + Math.random() * 0.2 - 0.1), // Mock price
-      dividendYield: dividendYield ? parseFloat(dividendYield) : undefined,
-      dividendFrequency: dividendYield ? dividendFrequency : undefined
-    });
-    
-    toast.success(`Added ${ticker.toUpperCase()} to your portfolio`);
-    resetForm();
-    setIsAddDialogOpen(false);
+    try {
+      setIsLookingUpTicker(true);
+      // Try to get real stock data first
+      const realData = await refreshStockData(false);
+      
+      const newStock: Stock = {
+        id: Date.now().toString(),
+        ticker: ticker.toUpperCase(),
+        quantity: parseFloat(quantity),
+        purchasePrice: parseFloat(purchasePrice),
+        currentPrice: realData ? realData.price : parseFloat(purchasePrice),
+        dividendYield: realData?.dividendYield ? realData.dividendYield : (dividendYield ? parseFloat(dividendYield) : undefined),
+        dividendFrequency: (realData?.dividendYield || dividendYield) ? dividendFrequency : undefined,
+        exDividendDate: realData?.dividendDate || undefined
+      };
+      
+      addStock(newStock);
+      
+      toast.success(`Added ${ticker.toUpperCase()} to your portfolio`);
+      resetForm();
+      setIsAddDialogOpen(false);
+    } catch (error) {
+      console.error("Error adding stock:", error);
+      toast.error("Failed to add stock. Please try again.");
+    } finally {
+      setIsLookingUpTicker(false);
+    }
   };
 
   const handleEditStock = (e: React.FormEvent) => {
@@ -108,6 +126,40 @@ export const StockList = () => {
     toast.success(`Removed ${stock.ticker} from your portfolio`);
   };
 
+  const handleLookupTicker = async () => {
+    if (!ticker) {
+      toast.error("Please enter a ticker symbol");
+      return;
+    }
+    
+    try {
+      setIsLookingUpTicker(true);
+      const data = await refreshStockData(false);
+      
+      if (data) {
+        toast.success(`Found stock info for ${ticker.toUpperCase()}`);
+        setDividendYield(data.dividendYield?.toString() || "");
+        if (data.dividendYield) {
+          setDividendFrequency("quarterly"); // Default to quarterly
+        }
+      }
+    } catch (error) {
+      console.error("Error looking up ticker:", error);
+    } finally {
+      setIsLookingUpTicker(false);
+    }
+  };
+
+  const handleRefreshStock = async (stock: Stock) => {
+    try {
+      setTicker(stock.ticker);
+      toast.info(`Refreshing data for ${stock.ticker}...`);
+      await refreshStockData(true);
+    } catch (error) {
+      console.error("Error refreshing stock:", error);
+    }
+  };
+
   // Calculate annual dividend income for a stock
   const calculateAnnualDividend = (stock: Stock) => {
     if (!stock.dividendYield) return 0;
@@ -130,14 +182,39 @@ export const StockList = () => {
             </DialogHeader>
             <form onSubmit={handleAddStock} className="space-y-4 pt-4">
               <div className="space-y-2">
-                <Label htmlFor="ticker">Ticker Symbol*</Label>
-                <Input
-                  id="ticker"
-                  placeholder="e.g. AAPL"
-                  value={ticker}
-                  onChange={(e) => setTicker(e.target.value)}
-                  required
-                />
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Label htmlFor="ticker">Ticker Symbol*</Label>
+                    <Input
+                      id="ticker"
+                      placeholder="e.g. AAPL"
+                      value={ticker}
+                      onChange={(e) => setTicker(e.target.value.toUpperCase())}
+                      required
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleLookupTicker}
+                      disabled={isLookingUpTicker || !ticker}
+                    >
+                      {isLookingUpTicker ? (
+                        <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4 mr-1" />
+                      )}
+                      Lookup
+                    </Button>
+                  </div>
+                </div>
+                {stockData && (
+                  <div className="text-sm text-green-600">
+                    Current price: ${stockData.price?.toFixed(2)}
+                    {stockData.dividendYield && ` • Dividend: ${stockData.dividendYield?.toFixed(2)}%`}
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="quantity">Quantity*</Label>
@@ -165,39 +242,45 @@ export const StockList = () => {
                   step="0.01"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="dividend-yield">Dividend Yield (%)</Label>
-                <Input
-                  id="dividend-yield"
-                  type="number"
-                  placeholder="e.g. 2.5"
-                  value={dividendYield}
-                  onChange={(e) => setDividendYield(e.target.value)}
-                  min="0"
-                  step="0.01"
-                />
-              </div>
-              {dividendYield && parseFloat(dividendYield) > 0 && (
-                <div className="space-y-2">
-                  <Label htmlFor="dividend-frequency">Dividend Frequency</Label>
-                  <Select
-                    value={dividendFrequency}
-                    onValueChange={(value) => setDividendFrequency(value as "monthly" | "quarterly" | "semi-annual" | "annual")}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="quarterly">Quarterly</SelectItem>
-                      <SelectItem value="semi-annual">Semi-Annual</SelectItem>
-                      <SelectItem value="annual">Annual</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              {!stockData && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="dividend-yield">Dividend Yield (%)</Label>
+                    <Input
+                      id="dividend-yield"
+                      type="number"
+                      placeholder="e.g. 2.5"
+                      value={dividendYield}
+                      onChange={(e) => setDividendYield(e.target.value)}
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+                  {dividendYield && parseFloat(dividendYield) > 0 && (
+                    <div className="space-y-2">
+                      <Label htmlFor="dividend-frequency">Dividend Frequency</Label>
+                      <Select
+                        value={dividendFrequency}
+                        onValueChange={(value) => setDividendFrequency(value as "monthly" | "quarterly" | "semi-annual" | "annual")}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="quarterly">Quarterly</SelectItem>
+                          <SelectItem value="semi-annual">Semi-Annual</SelectItem>
+                          <SelectItem value="annual">Annual</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </>
               )}
               <DialogFooter>
-                <Button type="submit">Add Stock</Button>
+                <Button type="submit" disabled={isLookingUpTicker}>
+                  {isLookingUpTicker ? 'Adding...' : 'Add Stock'}
+                </Button>
               </DialogFooter>
             </form>
           </DialogContent>
@@ -302,9 +385,30 @@ export const StockList = () => {
                     <TableCell className="font-medium">{stock.ticker}</TableCell>
                     <TableCell className="text-right">{stock.quantity}</TableCell>
                     <TableCell className="text-right">${stock.purchasePrice.toFixed(2)}</TableCell>
-                    <TableCell className="text-right">${stock.currentPrice.toFixed(2)}</TableCell>
                     <TableCell className="text-right">
-                      <span className={`flex items-center justify-end ${priceChange >= 0 ? 'text-gain' : 'text-loss'}`}>
+                      <div className="flex items-center justify-end space-x-1">
+                        <span>${stock.currentPrice.toFixed(2)}</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-6 w-6" 
+                                onClick={() => handleRefreshStock(stock)}
+                              >
+                                <RefreshCw className="h-3 w-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Refresh market data</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <span className={`flex items-center justify-end ${priceChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {priceChange >= 0 ? (
                           <ArrowUp className="h-4 w-4 mr-1" />
                         ) : (
@@ -315,7 +419,9 @@ export const StockList = () => {
                     </TableCell>
                     <TableCell className="text-right">${marketValue.toFixed(2)}</TableCell>
                     <TableCell className="text-right">
-                      {stock.dividendYield ? `${stock.dividendYield}%` : '-'}
+                      <div className="flex items-center justify-end space-x-1">
+                        <span>{stock.dividendYield ? `${stock.dividendYield.toFixed(2)}%` : '-'}</span>
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       {annualDividend > 0 ? `$${annualDividend.toFixed(2)}` : '-'}
