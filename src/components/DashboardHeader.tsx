@@ -8,7 +8,6 @@ import {
   DropdownMenuTrigger 
 } from "./ui/dropdown-menu";
 import { User, Settings, LogOut, Moon, Sun } from "lucide-react";
-import { toast } from "sonner";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
 
