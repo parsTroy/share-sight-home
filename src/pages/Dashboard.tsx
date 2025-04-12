@@ -2,7 +2,7 @@
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { PortfolioSummary } from "@/components/PortfolioSummary";
 import { PortfolioChart } from "@/components/PortfolioChart";
-import { StockList } from "@/components/StockList";
+import { StockList } from "@/components/stock-list/StockList";
 import { DividendSummary } from "@/components/DividendSummary";
 import { DividendGoalTracker } from "@/components/DividendGoalTracker";
 import { MonthlyDividendChart } from "@/components/MonthlyDividendChart";
