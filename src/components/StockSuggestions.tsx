@@ -19,6 +19,7 @@ import {
 } from "./ui/tooltip";
 import { toast } from "sonner";
 import { Stock } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Mock high-yield dividend stocks
 const highYieldStocks = [
@@ -77,6 +78,7 @@ const highYieldStocks = [
 export const StockSuggestions = () => {
   const { dividendGoal, portfolioValue, addStock } = usePortfolio();
   const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
   const [suggestions, setSuggestions] = useState(() => {
     // Return 3 random stocks from the high yield list
     return [...highYieldStocks]
@@ -97,7 +99,7 @@ export const StockSuggestions = () => {
     }, 800);
   };
 
-  const handleAddToPortfolio = (stock: typeof highYieldStocks[0]) => {
+  const handleAddToPortfolio = async (stock: typeof highYieldStocks[0]) => {
     const newStock: Stock = {
       id: Date.now().toString(),
       ticker: stock.ticker,
@@ -108,8 +110,17 @@ export const StockSuggestions = () => {
       dividendFrequency: stock.dividendFrequency as "monthly" | "quarterly" | "semi-annual" | "annual"
     };
     
-    addStock(newStock);
-    toast.success(`Added ${stock.ticker} to your portfolio`);
+    try {
+      await addStock(newStock);
+      
+      // Force refresh the stocks data to update portfolio metrics
+      queryClient.invalidateQueries({ queryKey: ['stocks'] });
+      
+      toast.success(`Added ${stock.ticker} to your portfolio`);
+    } catch (error) {
+      console.error("Error adding stock:", error);
+      toast.error(`Failed to add ${stock.ticker} to your portfolio`);
+    }
   };
   
   // Calculate how many shares are needed to achieve 1% of the dividend goal
