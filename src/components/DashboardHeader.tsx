@@ -28,7 +28,12 @@ export const DashboardHeader = () => {
   return (
     <header className="py-4 px-6 flex justify-between items-center border-b bg-background">
       <div className="flex items-center">
-        <h1 className="text-2xl font-bold text-primary">Dividnd</h1>
+        <h1 
+          onClick={() => navigate("/dashboard")} 
+          className="text-2xl font-bold text-primary cursor-pointer"
+        >
+          Dividnd
+        </h1>
       </div>
       <div className="flex items-center space-x-4">
         <Button 

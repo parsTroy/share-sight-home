@@ -1,5 +1,5 @@
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
@@ -10,10 +10,23 @@ export const LandingHeader = () => {
   const { theme, setTheme } = useTheme();
   const { user } = useAuth();
   
+  const handleLogoClick = () => {
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/");
+    }
+  };
+  
   return (
     <header className="py-4 px-6 md:px-10 flex justify-between items-center border-b bg-background">
       <div className="flex items-center">
-        <h1 className="text-2xl font-bold text-primary">Dividnd</h1>
+        <h1 
+          onClick={handleLogoClick}
+          className="text-2xl font-bold text-primary cursor-pointer"
+        >
+          Dividnd
+        </h1>
       </div>
       <div className="flex space-x-4 items-center">
         <Button 
