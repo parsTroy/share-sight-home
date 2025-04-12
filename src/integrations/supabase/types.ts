@@ -57,6 +57,30 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_data_cache: {
+        Row: {
+          dividend_yield: number | null
+          ex_dividend_date: string | null
+          price: number
+          ticker: string
+          updated_at: string | null
+        }
+        Insert: {
+          dividend_yield?: number | null
+          ex_dividend_date?: string | null
+          price: number
+          ticker: string
+          updated_at?: string | null
+        }
+        Update: {
+          dividend_yield?: number | null
+          ex_dividend_date?: string | null
+          price?: number
+          ticker?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       stocks: {
         Row: {
           created_at: string

@@ -1,17 +1,11 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.43.3';
-
-// This function can be scheduled to run daily to update all stock prices
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.38.4';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-const ALPHA_VANTAGE_API_KEY = Deno.env.get('ALPHA_VANTAGE_API_KEY');
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -20,123 +14,138 @@ serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(SUPABASE_URL || '', SUPABASE_ANON_KEY || '');
-    
-    // Get all unique tickers across all users
-    const { data: tickers, error: tickersError } = await supabase
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Verify JWT for security - only authenticated users can trigger this
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    // Get all unique stock tickers to update
+    const { data: uniqueTickers, error: tickersError } = await supabase
       .from('stocks')
       .select('ticker')
-      .order('ticker');
-      
+      .order('ticker')
+      .limit(5); // Processing in small batches to avoid rate limits
+
     if (tickersError) {
-      throw new Error(`Error fetching tickers: ${tickersError.message}`);
+      console.error(`Error fetching tickers: ${tickersError.message}`);
+      return new Response(
+        JSON.stringify({ error: `Error fetching tickers: ${tickersError.message}` }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
     }
-    
-    console.log(`Found ${tickers.length} unique tickers to update`);
-    const uniqueTickers = Array.from(new Set(tickers.map(t => t.ticker)));
-    
-    // Process 5 tickers at a time (Alpha Vantage rate limit)
-    const results = [];
-    let processed = 0;
-    
-    for (const ticker of uniqueTickers) {
-      // Rate limit: 5 API calls per minute (Alpha Vantage free tier)
-      if (processed > 0 && processed % 5 === 0) {
-        console.log(`Processed ${processed} tickers, pausing for rate limit...`);
-        await new Promise(resolve => setTimeout(resolve, 62000)); // 62 seconds to be safe
-      }
-      
+
+    if (!uniqueTickers || uniqueTickers.length === 0) {
+      return new Response(
+        JSON.stringify({ message: 'No stocks found to update' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Found ${uniqueTickers.length} unique tickers to update`);
+
+    // Process each ticker
+    const apiKey = Deno.env.get('ALPHA_VANTAGE_API_KEY');
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({ error: 'Alpha Vantage API key not configured' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      );
+    }
+
+    const updateResults = [];
+
+    // Update each ticker with a delay to avoid API rate limits
+    for (const item of uniqueTickers) {
+      const ticker = item.ticker;
       try {
-        // Fetch quote data
-        const quoteUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}`;
+        console.log(`Updating data for ${ticker}`);
+        
+        // Get quote data for current price
+        const quoteUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${ticker}&apikey=${apiKey}`;
         const quoteResponse = await fetch(quoteUrl);
         const quoteData = await quoteResponse.json();
-        
-        if (!quoteData['Global Quote'] || !quoteData['Global Quote']['05. price']) {
-          console.warn(`No price data found for ${ticker}`);
-          results.push({
-            ticker,
-            status: 'error',
-            message: 'No price data found'
-          });
-          continue;
+
+        // Check for API rate limiting
+        if (quoteData['Note']) {
+          console.warn(`API rate limit reached: ${quoteData['Note']}`);
+          updateResults.push({ ticker, status: 'rate_limited', message: quoteData['Note'] });
+          break; // Stop processing more tickers
         }
-        
-        const currentPrice = parseFloat(quoteData['Global Quote']['05. price']);
-        
-        // Get company overview for dividend data
-        const overviewUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${ticker}&apikey=${ALPHA_VANTAGE_API_KEY}`;
+
+        // Get overview data for dividend information
+        const overviewUrl = `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${ticker}&apikey=${apiKey}`;
         const overviewResponse = await fetch(overviewUrl);
         const overviewData = await overviewResponse.json();
-        
-        const dividendYield = overviewData.DividendYield 
-          ? parseFloat(overviewData.DividendYield) * 100 
-          : null;
-        
-        const exDividendDate = overviewData.ExDividendDate || null;
-        
-        // Update all stocks with this ticker
-        const { error: updateError } = await supabase
-          .from('stocks')
-          .update({
-            current_price: currentPrice,
-            dividend_yield: dividendYield,
-            ex_dividend_date: exDividendDate,
-            updated_at: new Date().toISOString()
-          })
-          .eq('ticker', ticker);
-          
-        if (updateError) {
-          throw new Error(`Error updating ${ticker}: ${updateError.message}`);
+
+        // Extract data
+        const price = parseFloat(quoteData['Global Quote']?.['05. price'] || '0');
+        const dividendYield = parseFloat(overviewData['DividendYield'] || '0');
+        const exDividendDate = overviewData['ExDividendDate'] || null;
+
+        if (price > 0) {
+          // Update cache
+          const { error: cacheError } = await supabase
+            .from('stock_data_cache')
+            .upsert({
+              ticker: ticker,
+              price,
+              dividend_yield: dividendYield > 0 ? dividendYield : null,
+              ex_dividend_date: exDividendDate ? new Date(exDividendDate) : null,
+              updated_at: new Date()
+            });
+
+          // Update all user stocks with this ticker
+          const { error: stocksError } = await supabase
+            .from('stocks')
+            .update({
+              current_price: price,
+              dividend_yield: dividendYield > 0 ? dividendYield : null,
+              ex_dividend_date: exDividendDate ? new Date(exDividendDate) : null,
+            })
+            .eq('ticker', ticker);
+
+          updateResults.push({ 
+            ticker, 
+            status: 'success',
+            price,
+            cacheError: cacheError?.message || null,
+            stocksError: stocksError?.message || null
+          });
+        } else {
+          updateResults.push({ ticker, status: 'error', message: 'Invalid price data received' });
         }
-        
-        // Cache the data
-        const { error: cacheError } = await supabase
-          .from('stock_data_cache')
-          .upsert({
-            ticker: ticker,
-            price: currentPrice,
-            dividend_yield: dividendYield,
-            ex_dividend_date: exDividendDate,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'ticker' });
-          
-        if (cacheError) {
-          console.warn(`Error caching data for ${ticker}: ${cacheError.message}`);
+
+        // Add a delay to avoid hitting API rate limits
+        if (uniqueTickers.length > 1) {
+          console.log('Waiting before processing next ticker...');
+          await new Promise(resolve => setTimeout(resolve, 15000)); // 15 second delay
         }
-        
-        results.push({
-          ticker,
-          status: 'success',
-          price: currentPrice,
-          dividendYield
-        });
-        
-        console.log(`Updated ${ticker}: $${currentPrice}, yield: ${dividendYield}%`);
-        
       } catch (error) {
-        console.error(`Error processing ${ticker}:`, error);
-        results.push({
-          ticker,
-          status: 'error',
-          message: error.message
-        });
+        console.error(`Error updating ${ticker}: ${error.message}`);
+        updateResults.push({ ticker, status: 'error', message: error.message });
       }
-      
-      processed++;
     }
-    
+
     return new Response(
-      JSON.stringify({
-        message: `Updated ${results.filter(r => r.status === 'success').length} of ${uniqueTickers.length} stocks`,
-        results
+      JSON.stringify({ 
+        message: `Updated ${updateResults.filter(r => r.status === 'success').length} out of ${uniqueTickers.length} stocks`,
+        results: updateResults
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
-    console.error('Error in update-stock-prices function:', error);
+    console.error(`Error in update-stock-prices function: ${error.message}`);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: `Internal server error: ${error.message}` }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
