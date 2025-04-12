@@ -65,6 +65,9 @@ serve(async (req) => {
     // Determine price ID based on monthly/annual choice
     const priceId = isAnnual ? 'price_annual' : 'price_monthly';
     
+    // Get domain from request or use production domain
+    const origin = req.headers.get("origin") || "https://dividnd.com";
+    
     // Create a Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -85,8 +88,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${req.headers.get("origin")}/dashboard?subscription=success`,
-      cancel_url: `${req.headers.get("origin")}/dashboard?subscription=canceled`,
+      success_url: `${origin}/dashboard?subscription=success`,
+      cancel_url: `${origin}/dashboard?subscription=canceled`,
     });
 
     logStep("Checkout session created", { sessionId: session.id });
