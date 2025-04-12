@@ -9,13 +9,15 @@ import { MonthlyDividendChart } from "@/components/MonthlyDividendChart";
 import { StockSuggestions } from "@/components/StockSuggestions";
 import { PortfolioProvider } from "@/hooks/use-portfolio";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Crown } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useSubscription } from "@/hooks/use-subscription";
 
 const Dashboard = () => {
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
+  const { isSubscribed, subscriptionTier, openCustomerPortal } = useSubscription();
   
   const updateAllPrices = async () => {
     setIsUpdatingPrices(true);
@@ -45,6 +47,21 @@ const Dashboard = () => {
         
         <main className="flex-grow p-6 md:p-10">
           <div className="max-w-7xl mx-auto space-y-8">
+            {/* Subscription Actions */}
+            {isSubscribed && subscriptionTier === "premium" && (
+              <div className="flex justify-end">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => openCustomerPortal()}
+                  className="border-amber-300 dark:border-amber-700"
+                >
+                  <Crown className="h-4 w-4 mr-2 text-amber-500" />
+                  Manage Premium Subscription
+                </Button>
+              </div>
+            )}
+            
             {/* Portfolio Summary Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1">

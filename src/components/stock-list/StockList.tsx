@@ -5,13 +5,16 @@ import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { usePortfolio } from "@/hooks/use-portfolio";
 import { useStockData } from "@/hooks/use-stock-data";
+import { useSubscription } from "@/hooks/use-subscription";
 import { Stock } from "@/types";
 import { StockTable } from "./StockTable";
 import { AddStockDialog } from "./AddStockDialog";
 import { EditStockDialog } from "./EditStockDialog";
+import { SubscriptionBanner } from "../SubscriptionBanner";
 
 export const StockList = () => {
   const { stocks, addStock, removeStock, updateStock } = usePortfolio();
+  const { canAddStock } = useSubscription();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -39,21 +42,31 @@ export const StockList = () => {
     }
   };
 
+  const handleOpenAddDialog = () => {
+    if (canAddStock(stocks.length)) {
+      setIsAddDialogOpen(true);
+    } else {
+      toast.error("You've reached your stock limit. Please upgrade to Premium for unlimited stocks.");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-medium">Your Stocks</h2>
-        <Button size="sm" onClick={() => setIsAddDialogOpen(true)}>
+        <Button size="sm" onClick={handleOpenAddDialog}>
           <Plus className="h-4 w-4 mr-1" /> Add Stock
         </Button>
       </div>
+
+      <SubscriptionBanner />
 
       <StockTable 
         stocks={stocks}
         onEdit={openEditDialog}
         onDelete={handleDelete}
         onRefresh={handleRefreshStock}
-        onOpenAddDialog={() => setIsAddDialogOpen(true)}
+        onOpenAddDialog={handleOpenAddDialog}
       />
 
       <AddStockDialog 
