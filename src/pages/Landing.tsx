@@ -2,9 +2,16 @@
 import { Button } from "@/components/ui/button";
 import { LandingHeader } from "@/components/LandingHeader";
 import { useNavigate } from "react-router-dom";
+import { CircleDollarSign, CheckCircle2, XCircle } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { useSubscription } from "@/hooks/use-subscription";
+import { useState } from "react";
 
 const Landing = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { startCheckout } = useSubscription();
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -27,6 +34,183 @@ const Landing = () => {
             <Button variant="outline" size="lg">
               View Demo
             </Button>
+          </div>
+        </section>
+
+        {/* Pricing Plans Section */}
+        <section id="pricing" className="py-20 px-6 md:px-10 bg-muted/50">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Simple, Transparent Pricing</h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Choose the plan that works for you. Start with our free tier and upgrade as your portfolio grows.
+              </p>
+            </div>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {/* Free Plan */}
+              <div className="border bg-card rounded-lg shadow-sm overflow-hidden flex flex-col">
+                <div className="p-6 border-b">
+                  <h3 className="text-xl font-semibold mb-2">Free</h3>
+                  <div className="flex items-baseline">
+                    <span className="text-3xl font-bold">$0</span>
+                    <span className="text-muted-foreground ml-1">/forever</span>
+                  </div>
+                  <p className="mt-4 text-muted-foreground">Perfect for beginners starting their dividend journey</p>
+                </div>
+                <div className="p-6 flex-grow">
+                  <ul className="space-y-3">
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Track up to 10 stocks</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Basic portfolio analytics</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Dividend tracking</span>
+                    </li>
+                    <li className="flex items-center">
+                      <XCircle className="h-5 w-5 text-gray-300 dark:text-gray-600 mr-2 flex-shrink-0" />
+                      <span className="text-muted-foreground">Advanced analytics</span>
+                    </li>
+                    <li className="flex items-center">
+                      <XCircle className="h-5 w-5 text-gray-300 dark:text-gray-600 mr-2 flex-shrink-0" />
+                      <span className="text-muted-foreground">Priority support</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="p-6 pt-0">
+                  <Button 
+                    onClick={() => navigate("/auth")} 
+                    className="w-full" 
+                    variant="outline"
+                  >
+                    Sign Up Free
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Premium Monthly Plan */}
+              <div className="border bg-card rounded-lg shadow-sm overflow-hidden flex flex-col border-primary">
+                <div className="bg-primary/10 p-2 text-center">
+                  <span className="text-sm font-medium text-primary">MOST POPULAR</span>
+                </div>
+                <div className="p-6 border-b">
+                  <h3 className="text-xl font-semibold mb-2">Premium Monthly</h3>
+                  <div className="flex items-baseline">
+                    <span className="text-3xl font-bold">$7.99</span>
+                    <span className="text-muted-foreground ml-1">/month</span>
+                  </div>
+                  <p className="mt-4 text-muted-foreground">Ideal for active investors building their portfolio</p>
+                </div>
+                <div className="p-6 flex-grow">
+                  <ul className="space-y-3">
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Unlimited stocks</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Advanced portfolio analytics</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Dividend forecasting</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Stock recommendations</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Priority email support</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="p-6 pt-0">
+                  <Button 
+                    className="w-full" 
+                    onClick={() => {
+                      if (user) {
+                        setIsLoading(true);
+                        startCheckout(false).finally(() => setIsLoading(false));
+                      } else {
+                        navigate("/auth");
+                      }
+                    }}
+                    disabled={isLoading}
+                  >
+                    {user ? "Subscribe Now" : "Sign Up & Subscribe"}
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Premium Annual Plan */}
+              <div className="border bg-card rounded-lg shadow-sm overflow-hidden flex flex-col">
+                <div className="p-6 border-b">
+                  <h3 className="text-xl font-semibold mb-2">Premium Annual</h3>
+                  <div className="flex items-baseline">
+                    <span className="text-3xl font-bold">$79</span>
+                    <span className="text-muted-foreground ml-1">/year</span>
+                  </div>
+                  <p className="mt-4 text-muted-foreground">Best value for committed dividend investors</p>
+                </div>
+                <div className="p-6 flex-grow">
+                  <ul className="space-y-3">
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Unlimited stocks</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Advanced portfolio analytics</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Dividend forecasting</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Stock recommendations</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span>Priority email support</span>
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0" />
+                      <span className="font-medium">Save 17% (2 months free)</span>
+                    </li>
+                  </ul>
+                </div>
+                <div className="p-6 pt-0">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => {
+                      if (user) {
+                        setIsLoading(true);
+                        startCheckout(true).finally(() => setIsLoading(false));
+                      } else {
+                        navigate("/auth");
+                      }
+                    }}
+                    disabled={isLoading}
+                  >
+                    {user ? "Subscribe Now" : "Sign Up & Subscribe"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="text-center mt-12">
+              <p className="text-muted-foreground">
+                Questions about our pricing? <a href="#" className="text-primary underline">Contact us</a>
+              </p>
+            </div>
           </div>
         </section>
 
