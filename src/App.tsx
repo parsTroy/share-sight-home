@@ -27,10 +27,11 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Determine if we're running on GitHub Pages
-  const isGitHubPages = window.location.hostname.includes("github.io");
+  // Determine if we're running on GitHub Pages or if the URL includes github.io
+  const isGitHubPages = window.location.hostname.includes("github.io") || 
+                        window.location.href.includes("github.io");
 
-  // Use HashRouter for GitHub Pages to avoid 404 issues with client-side routing
+  // Always use HashRouter for GitHub Pages deployment to avoid 404 issues
   const Router = isGitHubPages ? HashRouter : BrowserRouter;
 
   return (

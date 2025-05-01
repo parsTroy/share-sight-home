@@ -20,16 +20,15 @@
         }
       }(window.location))
       
-      // Redirect to the index page
+      // Redirect to the index page with proper hash routing
       const pathSegmentsToKeep = 1; // Adjust this based on your repository name and structure
       
       const l = window.location;
-      const redirectPath = l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' + 
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash;
+      const repositoryName = l.pathname.split('/')[1]; // Get repository name from URL
+      const baseUrl = l.origin + '/' + repositoryName;
       
-      window.location.replace(redirectPath);
+      // Redirect with hash routing
+      window.location.href = baseUrl + '/#' + l.pathname.slice(baseUrl.length + 1);
     </script>
   </head>
   <body>

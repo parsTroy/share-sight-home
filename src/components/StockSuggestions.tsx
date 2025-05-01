@@ -78,6 +78,7 @@ const highYieldStocks = [
 export const StockSuggestions = () => {
   const { dividendGoal, portfolioValue, addStock } = usePortfolio();
   const [refreshing, setRefreshing] = useState(false);
+  const [adding, setAdding] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const [suggestions, setSuggestions] = useState(() => {
     // Return 3 random stocks from the high yield list
@@ -100,6 +101,8 @@ export const StockSuggestions = () => {
   };
 
   const handleAddToPortfolio = async (stock: typeof highYieldStocks[0]) => {
+    setAdding(stock.ticker);
+    
     const newStock: Stock = {
       id: Date.now().toString(),
       ticker: stock.ticker,
@@ -113,13 +116,16 @@ export const StockSuggestions = () => {
     try {
       await addStock(newStock);
       
-      // Force refresh the stocks data to update portfolio metrics
+      // Force refresh ALL portfolio-related queries to ensure consistent data
       queryClient.invalidateQueries({ queryKey: ['stocks'] });
+      queryClient.invalidateQueries({ queryKey: ['dividendGoal'] });
       
       toast.success(`Added ${stock.ticker} to your portfolio`);
     } catch (error) {
       console.error("Error adding stock:", error);
       toast.error(`Failed to add ${stock.ticker} to your portfolio`);
+    } finally {
+      setAdding(null);
     }
   };
   
@@ -154,6 +160,7 @@ export const StockSuggestions = () => {
         <div className="space-y-4">
           {suggestions.map((stock) => {
             const sharesForGoal = calculateSharesForGoal(stock);
+            const isAdding = adding === stock.ticker;
             
             return (
               <div key={stock.ticker} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
@@ -183,9 +190,17 @@ export const StockSuggestions = () => {
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-                  <Button size="sm" onClick={() => handleAddToPortfolio(stock)}>
-                    <Plus className="h-3.5 w-3.5 mr-1" />
-                    Add
+                  <Button 
+                    size="sm" 
+                    onClick={() => handleAddToPortfolio(stock)} 
+                    disabled={isAdding}
+                  >
+                    {isAdding ? (
+                      <RefreshCw className="h-3.5 w-3.5 mr-1 animate-spin" />
+                    ) : (
+                      <Plus className="h-3.5 w-3.5 mr-1" />
+                    )}
+                    {isAdding ? 'Adding...' : 'Add'}
                   </Button>
                 </div>
               </div>
