@@ -31,19 +31,11 @@ jobs:
       - name: Add .nojekyll file
         run: touch dist/.nojekyll
         
-      - name: Copy 404.html
-        run: |
-          if [ -f public/404.html ]; then
-            cp public/404.html dist/404.html
-            echo "Copied 404.html from public directory"
-          else
-            echo "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Redirecting...</title><script>sessionStorage.redirect=location.href;location.href='/';</script></head><body></body></html>" > dist/404.html
-            echo "Created default 404.html"
-          fi
+      - name: Configure SPA routing for GitHub Pages
+        run: cp dist/index.html dist/404.html
         
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
           branch: gh-pages
-

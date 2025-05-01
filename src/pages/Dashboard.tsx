@@ -14,6 +14,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/use-subscription";
+import { Footer } from "@/components/landing/Footer";
 
 const Dashboard = () => {
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
@@ -104,6 +105,8 @@ const Dashboard = () => {
             <StockList />
           </div>
         </main>
+        
+        <Footer />
       </div>
     </PortfolioProvider>
   );

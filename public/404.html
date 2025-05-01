@@ -6,23 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Redirecting...</title>
     <script type="text/javascript">
-      // Single Page Apps for GitHub Pages - Modified for hash routing
+      // Single Page Apps for GitHub Pages - For hash routing
       (function() {
-        // Make sure we're in a browser environment
-        if (typeof window === 'undefined') return;
-
-        // Get current URL information
-        const { pathname, search, hash, href, origin } = window.location;
+        // Single Page Apps for GitHub Pages
+        var pathSegmentsToKeep = 0;
+        var l = window.location;
         
-        // Log the navigation attempt for debugging
-        console.log("404 page - Redirecting from:", pathname);
+        // Store the URL the user was trying to access
+        sessionStorage.redirect = l.pathname + l.search + l.hash;
         
         // Redirect to the root with hash routing
-        // This works because our app uses HashRouter which will handle the routing internally
-        const redirectUrl = origin + '/#' + pathname + (search || '') + (hash || '');
-        
-        console.log("Redirecting to:", redirectUrl);
-        window.location.replace(redirectUrl);
+        l.replace(
+          l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+          l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/#' +
+          l.pathname.slice(1)
+        );
       })();
     </script>
     <style>
