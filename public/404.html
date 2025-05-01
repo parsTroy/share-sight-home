@@ -6,32 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Redirecting...</title>
     <script type="text/javascript">
-      // Single Page Apps for GitHub Pages
-      // MIT License
-      // https://github.com/rafgraph/spa-github-pages
-      (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
+      // Single Page Apps for GitHub Pages - Modified to work better with hash routing
+      // Based on https://github.com/rafgraph/spa-github-pages
+      (function() {
+        const location = window.location;
+        
+        // Get the repository name (assuming format username.github.io/repo-name)
+        const segments = location.pathname.split('/');
+        const repo = segments[1];
+        
+        // Build a proper redirect URL with hash routing
+        let redirectPath;
+        
+        // Handle root level refresh - redirect to main page
+        if (segments.length <= 2 || segments[2] === '') {
+          redirectPath = location.origin + '/' + repo + '/#/';
+        } else {
+          // For other paths, redirect to the proper hash route
+          const path = '/' + segments.slice(2).join('/');
+          redirectPath = location.origin + '/' + repo + '/#' + path;
         }
-      }(window.location))
-      
-      // Redirect to the index page with proper hash routing
-      const pathSegmentsToKeep = 1; // Adjust this based on your repository name and structure
-      
-      const l = window.location;
-      const repositoryName = l.pathname.split('/')[1]; // Get repository name from URL
-      const baseUrl = l.origin + '/' + repositoryName;
-      
-      // Redirect with hash routing
-      window.location.href = baseUrl + '/#' + l.pathname.slice(baseUrl.length + 1);
+        
+        // Add any query params
+        if (location.search && location.search.length > 1) {
+          redirectPath += location.search;
+        }
+        
+        // Add any hash fragments
+        if (location.hash && location.hash.length > 1 && !redirectPath.includes('/#/')) {
+          redirectPath += location.hash;
+        }
+        
+        console.log('Redirecting to:', redirectPath);
+        window.location.replace(redirectPath);
+      })();
     </script>
   </head>
   <body>
-    <p>Redirecting to home page...</p>
+    <p>Redirecting to application...</p>
   </body>
 </html>

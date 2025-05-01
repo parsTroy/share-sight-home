@@ -27,13 +27,14 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Determine if we're running on GitHub Pages or if the URL includes github.io
-  const isGitHubPages = window.location.hostname.includes("github.io") || 
-                        window.location.href.includes("github.io");
+  // ALWAYS use HashRouter for GitHub Pages deployment to avoid 404 issues
+  // This handles both github.io domains and custom domains served through GitHub Pages
+  const isGitHubPages = true; // Force HashRouter for consistent behavior
+  const Router = HashRouter; // Always use HashRouter for reliable client-side routing
 
-  // Always use HashRouter for GitHub Pages deployment to avoid 404 issues
-  const Router = isGitHubPages ? HashRouter : BrowserRouter;
-
+  // Log routing information to help with debugging
+  console.log('App initialization - Using HashRouter for routing');
+  
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="system">
