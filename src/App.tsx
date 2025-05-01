@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, HashRouter } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/use-theme";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
@@ -27,23 +27,18 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // ALWAYS use HashRouter for GitHub Pages deployment to avoid 404 issues
-  // This handles both github.io domains and custom domains served through GitHub Pages
-  const isGitHubPages = true; // Force HashRouter for consistent behavior
-  const Router = HashRouter; // Always use HashRouter for reliable client-side routing
-
-  // Log routing information to help with debugging
+  // Always use HashRouter for GitHub Pages to avoid 404 issues
   console.log('App initialization - Using HashRouter for routing');
   
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="system">
+      <ThemeProvider defaultTheme="system" storageKey="ui-theme">
         <AuthProvider>
           <SubscriptionProvider>
             <TooltipProvider>
               <Toaster />
               <Sonner />
-              <Router>
+              <HashRouter>
                 <Routes>
                   <Route path="/" element={<Landing />} />
                   <Route path="/auth" element={<Auth />} />
@@ -58,7 +53,7 @@ const App = () => {
                   } />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </Router>
+              </HashRouter>
             </TooltipProvider>
           </SubscriptionProvider>
         </AuthProvider>

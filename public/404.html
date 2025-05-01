@@ -6,43 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Redirecting...</title>
     <script type="text/javascript">
-      // Single Page Apps for GitHub Pages - Modified to work better with hash routing
-      // Based on https://github.com/rafgraph/spa-github-pages
+      // Single Page Apps for GitHub Pages - Modified for hash routing
       (function() {
-        const location = window.location;
+        // Make sure we're in a browser environment
+        if (typeof window === 'undefined') return;
+
+        // Get current URL information
+        const { pathname, search, hash, href, origin } = window.location;
         
-        // Get the repository name (assuming format username.github.io/repo-name)
-        const segments = location.pathname.split('/');
-        const repo = segments[1];
+        // Log the navigation attempt for debugging
+        console.log("404 page - Redirecting from:", pathname);
         
-        // Build a proper redirect URL with hash routing
-        let redirectPath;
+        // Redirect to the root with hash routing
+        // This works because our app uses HashRouter which will handle the routing internally
+        const redirectUrl = origin + '/#' + pathname + (search || '') + (hash || '');
         
-        // Handle root level refresh - redirect to main page
-        if (segments.length <= 2 || segments[2] === '') {
-          redirectPath = location.origin + '/' + repo + '/#/';
-        } else {
-          // For other paths, redirect to the proper hash route
-          const path = '/' + segments.slice(2).join('/');
-          redirectPath = location.origin + '/' + repo + '/#' + path;
-        }
-        
-        // Add any query params
-        if (location.search && location.search.length > 1) {
-          redirectPath += location.search;
-        }
-        
-        // Add any hash fragments
-        if (location.hash && location.hash.length > 1 && !redirectPath.includes('/#/')) {
-          redirectPath += location.hash;
-        }
-        
-        console.log('Redirecting to:', redirectPath);
-        window.location.replace(redirectPath);
+        console.log("Redirecting to:", redirectUrl);
+        window.location.replace(redirectUrl);
       })();
     </script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem;
+        text-align: center;
+      }
+      
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+      }
+      
+      p {
+        margin-bottom: 1rem;
+        color: #666;
+      }
+    </style>
   </head>
   <body>
-    <p>Redirecting to application...</p>
+    <h1>Redirecting...</h1>
+    <p>If you are not redirected automatically, <a href="/">click here</a>.</p>
   </body>
 </html>

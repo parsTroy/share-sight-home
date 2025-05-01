@@ -28,7 +28,15 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
+    () => {
+      try {
+        const savedTheme = localStorage.getItem(storageKey) as Theme;
+        return savedTheme || defaultTheme;
+      } catch (error) {
+        console.warn("Error accessing localStorage:", error);
+        return defaultTheme;
+      }
+    }
   );
 
   useEffect(() => {
@@ -43,16 +51,23 @@ export function ThemeProvider({
         : "light";
       
       root.classList.add(systemTheme);
+      console.log(`Applied system theme: ${systemTheme}`);
     } else {
       root.classList.add(theme);
+      console.log(`Applied theme: ${theme}`);
     }
   }, [theme]);
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
+    setTheme: (newTheme: Theme) => {
+      try {
+        console.log(`Setting theme to: ${newTheme}`);
+        localStorage.setItem(storageKey, newTheme);
+        setTheme(newTheme);
+      } catch (error) {
+        console.error("Failed to set theme:", error);
+      }
     },
   };
 
