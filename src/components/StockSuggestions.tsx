@@ -76,7 +76,7 @@ const highYieldStocks = [
 ];
 
 export const StockSuggestions = () => {
-  const { dividendGoal, portfolioValue, addStock } = usePortfolio();
+  const { dividendGoal, portfolioValue, addStock, updateStock, stocks } = usePortfolio();
   const [refreshing, setRefreshing] = useState(false);
   const [adding, setAdding] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -103,24 +103,41 @@ export const StockSuggestions = () => {
   const handleAddToPortfolio = async (stock: typeof highYieldStocks[0]) => {
     setAdding(stock.ticker);
     
-    const newStock: Stock = {
-      id: Date.now().toString(),
-      ticker: stock.ticker,
-      quantity: 1, // Default to 1 share
-      purchasePrice: stock.price,
-      currentPrice: stock.price,
-      dividendYield: stock.dividendYield,
-      dividendFrequency: stock.dividendFrequency as "monthly" | "quarterly" | "semi-annual" | "annual"
-    };
-    
     try {
-      await addStock(newStock);
+      // Check if the stock already exists in the portfolio
+      const existingStock = stocks.find(s => s.ticker.toUpperCase() === stock.ticker.toUpperCase());
+      
+      if (existingStock) {
+        // Update the existing position
+        const updatedStock: Stock = {
+          ...existingStock,
+          quantity: existingStock.quantity + 1, // Add 1 share by default
+          // Recalculate the weighted average purchase price
+          purchasePrice: ((existingStock.quantity * existingStock.purchasePrice) + stock.price) / (existingStock.quantity + 1)
+        };
+        
+        await updateStock(updatedStock);
+        toast.success(`Added 1 share to your ${stock.ticker} position`);
+      } else {
+        // Create a new position
+        const newStock: Stock = {
+          id: Date.now().toString(),
+          ticker: stock.ticker,
+          quantity: 1, // Default to 1 share
+          purchasePrice: stock.price,
+          currentPrice: stock.price,
+          dividendYield: stock.dividendYield,
+          dividendFrequency: stock.dividendFrequency as "monthly" | "quarterly" | "semi-annual" | "annual"
+        };
+        
+        await addStock(newStock);
+        toast.success(`Added ${stock.ticker} to your portfolio`);
+      }
       
       // Force refresh ALL portfolio-related queries to ensure consistent data
       queryClient.invalidateQueries({ queryKey: ['stocks'] });
       queryClient.invalidateQueries({ queryKey: ['dividendGoal'] });
       
-      toast.success(`Added ${stock.ticker} to your portfolio`);
     } catch (error) {
       console.error("Error adding stock:", error);
       toast.error(`Failed to add ${stock.ticker} to your portfolio`);
@@ -161,6 +178,7 @@ export const StockSuggestions = () => {
           {suggestions.map((stock) => {
             const sharesForGoal = calculateSharesForGoal(stock);
             const isAdding = adding === stock.ticker;
+            const existingStock = stocks.find(s => s.ticker.toUpperCase() === stock.ticker.toUpperCase());
             
             return (
               <div key={stock.ticker} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
@@ -174,6 +192,11 @@ export const StockSuggestions = () => {
                     <div className="text-xs text-muted-foreground">
                       ${stock.price.toFixed(2)} / share
                     </div>
+                    {existingStock && (
+                      <div className="text-xs ml-2 bg-blue-100 dark:bg-blue-900 px-2 py-0.5 rounded-full">
+                        You own {existingStock.quantity} {existingStock.quantity === 1 ? 'share' : 'shares'}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -200,7 +223,7 @@ export const StockSuggestions = () => {
                     ) : (
                       <Plus className="h-3.5 w-3.5 mr-1" />
                     )}
-                    {isAdding ? 'Adding...' : 'Add'}
+                    {isAdding ? 'Adding...' : existingStock ? 'Add Share' : 'Add'}
                   </Button>
                 </div>
               </div>
