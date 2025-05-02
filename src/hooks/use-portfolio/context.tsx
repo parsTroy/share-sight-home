@@ -17,10 +17,10 @@ export const PortfolioContext = createContext<PortfolioContextValue | undefined>
 export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [dividendGoal, setDividendGoalState] = useState<number>(5000);
+  const [dividendGoalState, setDividendGoalState] = useState<number>(5000);
 
   // Fetch stocks from Supabase
-  const { data: stocks = [] } = useQuery({
+  const { data: stocks = [], isLoading, error } = useQuery({
     queryKey: ['stocks', user?.id],
     queryFn: () => fetchStocks(user?.id),
     enabled: !!user,
@@ -118,7 +118,9 @@ export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
       removeStock,
       updateStock,
       dividendGoal,
-      setDividendGoal
+      setDividendGoal,
+      isLoading,
+      error
     }}>
       {children}
     </PortfolioContext.Provider>

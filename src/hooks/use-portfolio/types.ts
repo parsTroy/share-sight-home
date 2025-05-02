@@ -11,4 +11,6 @@ export interface PortfolioContextValue {
   updateStock: (stock: Stock) => void;
   dividendGoal: number;
   setDividendGoal: (goal: number) => void;
+  isLoading: boolean;
+  error: any;
 }

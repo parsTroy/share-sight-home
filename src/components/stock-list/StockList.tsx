@@ -13,7 +13,7 @@ import { EditStockDialog } from "./EditStockDialog";
 import { SubscriptionBanner } from "../SubscriptionBanner";
 
 export const StockList = () => {
-  const { stocks, addStock, removeStock, updateStock } = usePortfolio();
+  const { stocks, addStock, removeStock, updateStock, isLoading, error } = usePortfolio();
   const { canAddStock, stockLimit, subscriptionTier } = useSubscription();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -53,6 +53,27 @@ export const StockList = () => {
       }
     }
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <p className="text-lg text-muted-foreground">Loading your portfolio...</p>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center p-8 gap-4">
+        <p className="text-lg text-red-500">Error loading your portfolio</p>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
