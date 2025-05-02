@@ -117,7 +117,7 @@ export const PortfolioProvider = ({ children }: { children: ReactNode }) => {
       addStock,
       removeStock,
       updateStock,
-      dividendGoal,
+      dividendGoal: dividendGoalState,
       setDividendGoal,
       isLoading,
       error
