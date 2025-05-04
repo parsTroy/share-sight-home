@@ -11,6 +11,7 @@ import { EditStockDialog } from "./EditStockDialog";
 import { SubscriptionBanner } from "../SubscriptionBanner";
 import { StockListHeader } from "./StockListHeader";
 import { useStockListState } from "./useStockListState";
+import { Button } from "@/components/ui/button";
 
 export const StockList = () => {
   const { stocks, addStock, removeStock, updateStock, isLoading, error } = usePortfolio();
@@ -20,6 +21,11 @@ export const StockList = () => {
   const [ticker, setTicker] = useState<string | null>(null);
   const { refreshStockData } = useStockData(ticker);
   
+  // Create a wrapper function that works with the Stock object
+  const handleRemoveStock = (stock: Stock) => {
+    removeStock(stock.id);
+  };
+
   const { 
     isEditDialogOpen, 
     setIsEditDialogOpen, 
@@ -27,7 +33,7 @@ export const StockList = () => {
     handleDelete, 
     openEditDialog, 
     handleRefreshStock 
-  } = useStockListState(updateStock, removeStock);
+  } = useStockListState(updateStock, handleRemoveStock);
 
   const handleOpenAddDialog = () => {
     if (canAddStock(stocks.length)) {
@@ -91,6 +97,3 @@ export const StockList = () => {
     </div>
   );
 };
-
-// Missing Button import
-import { Button } from "@/components/ui/button";
