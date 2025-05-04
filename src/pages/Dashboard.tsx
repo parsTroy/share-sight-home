@@ -9,12 +9,13 @@ import { MonthlyDividendChart } from "@/components/MonthlyDividendChart";
 import { StockSuggestions } from "@/components/StockSuggestions";
 import { PortfolioProvider } from "@/hooks/use-portfolio";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Crown } from "lucide-react";
+import { Crown } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/use-subscription";
 import { Footer } from "@/components/landing/Footer";
+import { StockRefreshButton } from "@/components/stock-list/StockRefreshButton";
 
 const Dashboard = () => {
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
@@ -92,15 +93,11 @@ const Dashboard = () => {
             {/* Stock List Section */}
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-medium">Your Stocks</h2>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={updateAllPrices} 
-                disabled={isUpdatingPrices}
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isUpdatingPrices ? 'animate-spin' : ''}`} />
-                Update All Prices
-              </Button>
+              <StockRefreshButton 
+                onRefresh={() => updateAllPrices()} 
+                isRefreshing={isUpdatingPrices}
+                buttonText="Update All Prices"
+              />
             </div>
             <StockList />
           </div>
