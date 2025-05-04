@@ -8,72 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "./ui/card";
-import { Button } from "./ui/button";
 import { usePortfolio } from "@/hooks/use-portfolio";
-import { Plus, Info, RefreshCw } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "./ui/tooltip";
+import { Info } from "lucide-react";
 import { toast } from "sonner";
 import { Stock } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
-
-// Mock high-yield dividend stocks
-const highYieldStocks = [
-  {
-    ticker: "ABBV",
-    name: "AbbVie Inc.",
-    sector: "Healthcare",
-    price: 152.75,
-    dividendYield: 4.2,
-    dividendFrequency: "quarterly",
-    annualDividend: 6.42,
-    description: "Biopharmaceutical company and maker of Humira"
-  },
-  {
-    ticker: "VZ",
-    name: "Verizon Communications",
-    sector: "Communication",
-    price: 40.50,
-    dividendYield: 6.8,
-    dividendFrequency: "quarterly",
-    annualDividend: 2.75,
-    description: "Telecommunications provider"
-  },
-  {
-    ticker: "MO",
-    name: "Altria Group",
-    sector: "Consumer Staples",
-    price: 43.25,
-    dividendYield: 8.6,
-    dividendFrequency: "quarterly",
-    annualDividend: 3.72,
-    description: "Tobacco and cigarette manufacturer"
-  },
-  {
-    ticker: "T",
-    name: "AT&T Inc.",
-    sector: "Communication",
-    price: 17.85,
-    dividendYield: 5.9,
-    dividendFrequency: "quarterly",
-    annualDividend: 1.05,
-    description: "Telecommunications and media conglomerate"
-  },
-  {
-    ticker: "IBM",
-    name: "International Business Machines",
-    sector: "Technology",
-    price: 145.80,
-    dividendYield: 4.6,
-    dividendFrequency: "quarterly",
-    annualDividend: 6.71,
-    description: "Technology and consulting company"
-  }
-];
+import { highYieldStocks } from "./stock-suggestions/mockStocks";
+import { RefreshButton } from "./stock-suggestions/RefreshButton";
+import { SuggestionsList } from "./stock-suggestions/SuggestionsList";
 
 export const StockSuggestions = () => {
   const { dividendGoal, portfolioValue, addStock, updateStock, stocks } = usePortfolio();
@@ -162,74 +104,17 @@ export const StockSuggestions = () => {
               Stocks that could help you reach your dividend goal
             </CardDescription>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={refreshSuggestions}
-            disabled={refreshing}
-          >
-            <RefreshCw className={`h-4 w-4 mr-1 ${refreshing ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
+          <RefreshButton onRefresh={refreshSuggestions} isRefreshing={refreshing} />
         </div>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {suggestions.map((stock) => {
-            const sharesForGoal = calculateSharesForGoal(stock);
-            const isAdding = adding === stock.ticker;
-            const existingStock = stocks.find(s => s.ticker.toUpperCase() === stock.ticker.toUpperCase());
-            
-            return (
-              <div key={stock.ticker} className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0">
-                <div>
-                  <div className="font-medium">{stock.ticker} - {stock.name}</div>
-                  <div className="text-sm text-muted-foreground">{stock.sector}</div>
-                  <div className="flex items-center mt-1">
-                    <div className="text-sm font-medium text-green-600 mr-3">
-                      Yield: {stock.dividendYield}%
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      ${stock.price.toFixed(2)} / share
-                    </div>
-                    {existingStock && (
-                      <div className="text-xs ml-2 bg-blue-100 dark:bg-blue-900 px-2 py-0.5 rounded-full">
-                        You own {existingStock.quantity} {existingStock.quantity === 1 ? 'share' : 'shares'}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center text-xs bg-muted p-1.5 rounded mr-2">
-                          <Info className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-                          ~{sharesForGoal} shares for 1% of goal
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Buying {sharesForGoal} shares would add ~${(sharesForGoal * stock.annualDividend).toFixed(2)} in annual dividends</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <Button 
-                    size="sm" 
-                    onClick={() => handleAddToPortfolio(stock)} 
-                    disabled={isAdding}
-                  >
-                    {isAdding ? (
-                      <RefreshCw className="h-3.5 w-3.5 mr-1 animate-spin" />
-                    ) : (
-                      <Plus className="h-3.5 w-3.5 mr-1" />
-                    )}
-                    {isAdding ? 'Adding...' : existingStock ? 'Add Share' : 'Add'}
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <SuggestionsList
+          suggestions={suggestions}
+          stocks={stocks}
+          adding={adding}
+          handleAddToPortfolio={handleAddToPortfolio}
+          calculateSharesForGoal={calculateSharesForGoal}
+        />
       </CardContent>
       <CardFooter className="border-t pt-4 text-sm text-muted-foreground">
         <div className="flex items-center">
