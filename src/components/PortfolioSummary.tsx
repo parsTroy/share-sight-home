@@ -5,9 +5,12 @@ import { usePortfolio } from "@/hooks/use-portfolio";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
 export const PortfolioSummary = () => {
-  const { portfolioValue, portfolioChange, portfolioChangePercent } = usePortfolio();
+  const { portfolioValue, portfolioChange, portfolioChangePercent, stocks } = usePortfolio();
   
   const isPositiveChange = portfolioChange >= 0;
+  
+  // Calculate daily goal progress - default to 0% if no stocks
+  const dailyGoalProgress = stocks.length ? 78 : 0;
 
   return (
     <Card className="w-full">
@@ -34,9 +37,9 @@ export const PortfolioSummary = () => {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Daily Goal</span>
-              <span className="font-medium">78%</span>
+              <span className="font-medium">{dailyGoalProgress}%</span>
             </div>
-            <Progress value={78} />
+            <Progress value={dailyGoalProgress} />
           </div>
         </div>
       </CardContent>

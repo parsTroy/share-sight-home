@@ -6,21 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Redirecting...</title>
     <script type="text/javascript">
-      // Single Page Apps for GitHub Pages - For hash routing
+      // Improved GitHub Pages SPA redirection for hash routing
       (function() {
-        // Single Page Apps for GitHub Pages
-        var pathSegmentsToKeep = 0;
-        var l = window.location;
-        
         // Store the URL the user was trying to access
-        sessionStorage.redirect = l.pathname + l.search + l.hash;
+        sessionStorage.redirect = window.location.pathname + window.location.search;
         
-        // Redirect to the root with hash routing
-        l.replace(
-          l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-          l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/#' +
-          l.pathname.slice(1)
-        );
+        // Redirect to the index page with a reference to this path
+        const rootPath = window.location.origin;
+        window.location.href = rootPath + '/#' + window.location.pathname.slice(1);
       })();
     </script>
     <style>

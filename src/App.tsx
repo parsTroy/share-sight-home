@@ -17,6 +17,7 @@ import { AuthProvider } from "./hooks/use-auth";
 import { SubscriptionProvider } from "./hooks/use-subscription";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 
+// Create a new query client with optimized defaults
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -27,7 +28,7 @@ const queryClient = new QueryClient({
 });
 
 const App = () => {
-  // Always use HashRouter for GitHub Pages to avoid 404 issues
+  // Using HashRouter for GitHub Pages to avoid 404 issues
   console.log('App initialization - Using HashRouter for routing');
   
   return (
@@ -38,6 +39,7 @@ const App = () => {
             <TooltipProvider>
               <Toaster />
               <Sonner />
+              {/* HashRouter ensures that even on page refresh, the app will load correctly */}
               <HashRouter>
                 <Routes>
                   <Route path="/" element={<Landing />} />
