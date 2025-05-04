@@ -21,20 +21,6 @@
     <meta name="twitter:image" content="https://dividnd.com/opengraph-image.png" />
     
     <link rel="canonical" href="https://dividnd.com" />
-    <script type="text/javascript">
-      // Improved single page redirect handling
-      (function() {
-        // Check if coming from a redirect
-        const redirect = sessionStorage.redirect;
-        if (redirect && redirect !== location.href) {
-          // Clear the redirect path from sessionStorage
-          delete sessionStorage.redirect;
-          
-          // Now we can use the history API to properly handle the path
-          history.replaceState(null, null, redirect);
-        }
-      })();
-    </script>
   </head>
 
   <body>
