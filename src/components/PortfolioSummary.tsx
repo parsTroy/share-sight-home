@@ -10,7 +10,7 @@ export const PortfolioSummary = () => {
   const isPositiveChange = portfolioChange >= 0;
   
   // Calculate daily goal progress - default to 0% if no stocks
-  const dailyGoalProgress = stocks.length ? 78 : 0;
+  const dailyGoalProgress = stocks.length > 0 ? 78 : 0;
 
   return (
     <Card className="w-full">
