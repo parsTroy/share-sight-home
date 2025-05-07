@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSubscription } from "@/hooks/use-subscription";
 import { Footer } from "@/components/landing/Footer";
 import { StockRefreshButton } from "@/components/stock-list/StockRefreshButton";
+import { SectorAllocation } from "@/components/SectorAllocation";
 
 const Dashboard = () => {
   const [isUpdatingPrices, setIsUpdatingPrices] = useState(false);
@@ -84,6 +85,13 @@ const Dashboard = () => {
               </div>
               <div className="lg:col-span-1">
                 <MonthlyDividendChart />
+              </div>
+            </div>
+            
+            {/* Sector Allocation */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-1">
+                <SectorAllocation />
               </div>
             </div>
             

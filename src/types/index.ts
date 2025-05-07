@@ -1,4 +1,3 @@
-
 export interface Stock {
   id: string;
   ticker: string;
@@ -8,6 +7,7 @@ export interface Stock {
   dividendYield?: number;
   dividendFrequency?: 'monthly' | 'quarterly' | 'semi-annual' | 'annual';
   exDividendDate?: string;
+  sector?: string; // Add sector field
 }
 
 export interface Portfolio {
