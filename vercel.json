@@ -1,12 +1,9 @@
 
 {
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/" }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "github": {
     "silent": true
-  },
-  "cleanUrls": true,
-  "trailingSlash": false
+  }
 }
