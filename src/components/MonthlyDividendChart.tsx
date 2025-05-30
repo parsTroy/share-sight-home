@@ -77,7 +77,7 @@ export const MonthlyDividendChart = () => {
             />
             <Tooltip 
               formatter={(value) => [`$${value}`, "Dividend"]}
-              contentStyle={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: '6px' }}
+              contentStyle={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: '6px', color: '#000' }}
             />
             <Bar 
               dataKey="amount" 

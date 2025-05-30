@@ -73,7 +73,7 @@ export const SectorAllocation = () => {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => `$${value.toLocaleString()}`} />
+              <Tooltip formatter={(value) => `$${value.toLocaleString()}`} contentStyle={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: '6px', color: '#000' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
