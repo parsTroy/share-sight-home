@@ -70,7 +70,7 @@ export const DividendSummary = () => {
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-medium">Dividend Income</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 h-[280px]">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex items-center gap-2 p-3 rounded-md bg-muted/50">
             <DollarSign className="h-5 w-5 text-muted-foreground" />

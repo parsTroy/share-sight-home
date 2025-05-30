@@ -60,7 +60,7 @@ export const MonthlyDividendChart = () => {
       <CardHeader className="pb-2">
         <CardTitle className="text-lg font-medium">Monthly Dividend Distribution</CardTitle>
       </CardHeader>
-      <CardContent className="h-64">
+      <CardContent className="h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={monthlyDividends}>
             <XAxis 

@@ -68,7 +68,10 @@ const Dashboard = () => {
             {/* Portfolio Summary Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-1">
-                <PortfolioSummary />
+                <div className="flex flex-col gap-2">
+                  <PortfolioSummary />
+                  <DividendGoalTracker />
+                </div>
               </div>
               <div className="lg:col-span-2">
                 <PortfolioChart />
@@ -81,16 +84,9 @@ const Dashboard = () => {
                 <DividendSummary />
               </div>
               <div className="lg:col-span-1">
-                <DividendGoalTracker />
-              </div>
-              <div className="lg:col-span-1">
                 <MonthlyDividendChart />
               </div>
-            </div>
-            
-            {/* Sector Allocation */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-1">
+              <div className="lg:col-span-1">
                 <SectorAllocation />
               </div>
             </div>

@@ -45,9 +45,9 @@ export const SectorAllocation = () => {
   ];
 
   return (
-    <Card className="h-full">
-      <CardContent className="pt-6">
-        <div className="flex items-center justify-between mb-4">
+    <Card>
+      <CardContent className="pt-4">
+        <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h3 className="font-semibold flex items-center gap-2">
               <PieChartIcon className="h-5 w-5" />
@@ -56,7 +56,7 @@ export const SectorAllocation = () => {
             <p className="text-sm text-muted-foreground">Portfolio diversification</p>
           </div>
         </div>
-        <div className="h-[300px]">
+        <div className="h-[255px]">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie

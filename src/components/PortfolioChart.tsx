@@ -24,7 +24,7 @@ export const PortfolioChart = () => {
   const chartData = generatePortfolioData(timeRange);
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-[480px]">
       <CardHeader className="pb-2 flex flex-row justify-between items-center">
         <CardTitle className="text-lg font-medium">Portfolio Performance</CardTitle>
         <Select 
@@ -80,7 +80,7 @@ export const PortfolioChart = () => {
             <Tooltip 
               formatter={(value) => [`$${value}`, "Portfolio Value"]} 
               labelFormatter={(label) => `Date: ${label}`}
-              contentStyle={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}
+              contentStyle={{ background: '#fff', border: '1px solid #f0f0f0', borderRadius: '6px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', color: '#000' }}
             />
             <Area 
               type="monotone" 
